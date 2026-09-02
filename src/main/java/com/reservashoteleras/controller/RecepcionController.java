@@ -19,18 +19,18 @@ public class RecepcionController {
     private final ReservaService reservaService;
 
     @GetMapping("/reservas")
-    public ResponseEntity<List<ReservaDTO>> getReservas() {
-        return ResponseEntity.ok(reservaService.getAllReservasDTO());
+    public ResponseEntity<List<Reserva>> getReservas() {
+        return ResponseEntity.ok(reservaService.getAllReservas());
     }
 
     @GetMapping("/reservas/{id}")
-    public ResponseEntity<ReservaDTO> getReservaById(@PathVariable Long id) {
-        return ResponseEntity.ok(reservaService.getReservaByIdDTO(id));
+    public ResponseEntity<Reserva> getReservaById(@PathVariable Long id) {
+        return ResponseEntity.ok(reservaService.getReservaById(id));
     }
 
     @PatchMapping("/reservas/{id}/cancelar")
     public ResponseEntity<Reserva> cancelarReserva(@PathVariable Long id, @RequestParam String motivo, Authentication auth) {
-        Usuario usuario = (Usuario) auth.getPrincipal();
+        Usuario usuario = obtenerUsuario(auth);
         return ResponseEntity.ok(reservaService.cancelarReserva(id, motivo, usuario));
     }
 
@@ -53,5 +53,12 @@ public class RecepcionController {
     @PatchMapping("/checkout/{reservaId}")
     public ResponseEntity<Reserva> realizarCheckOut(@PathVariable Long reservaId) {
         return ResponseEntity.ok(reservaService.realizarCheckOut(reservaId));
+    }
+
+    private Usuario obtenerUsuario(Authentication auth) {
+        if (auth.getPrincipal() instanceof Usuario usuario) {
+            return usuario;
+        }
+        throw new IllegalStateException("La sesión autenticada no contiene un usuario válido");
     }
 }

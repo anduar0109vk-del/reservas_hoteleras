@@ -1,6 +1,7 @@
 package com.reservashoteleras.entity;
 
 import com.reservashoteleras.entity.enums.EstadoReserva;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -73,12 +74,15 @@ public class Reserva {
     private String motivoCancelacion;
     
     @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<ReservaServicio> servicios = new ArrayList<>();
-    
+
     @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Pago pago;
-    
+
     @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL)
+    @JsonIgnore
     private CheckIn checkIn;
 
     // ✅ Métodos explícitos para evitar errores

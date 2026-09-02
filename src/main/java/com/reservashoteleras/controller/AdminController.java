@@ -226,7 +226,7 @@ public class AdminController {
         String csv = reporteService.generarCSV(datos, columnas);
         
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.TEXT_PLAIN);
+        headers.setContentType(MediaType.parseMediaType("text/csv;charset=UTF-8"));
         headers.setContentDispositionFormData("attachment", "reporte-reservas.csv");
         
         return ResponseEntity.ok().headers(headers).body(csv);

@@ -140,6 +140,17 @@ public class ReservaService {
 
     @Transactional
     public Reserva crearReserva(ReservaRequest request, Long usuarioId) {
+        if (request.getFechaEntrada() == null || request.getFechaSalida() == null
+                || !request.getFechaSalida().isAfter(request.getFechaEntrada())) {
+            throw new RuntimeException("Las fechas de entrada y salida son obligatorias y válidas");
+        }
+        if (request.getHabitacionId() == null || request.getClienteId() == null) {
+            throw new RuntimeException("El cliente y la habitación son obligatorios");
+        }
+        if (request.getMetodoPago() == null || request.getMetodoPago().isBlank()) {
+            throw new RuntimeException("El método de pago es obligatorio");
+        }
+
         List<Habitacion> disponibles = habitacionRepository.findDisponiblesEntreFechas(
             request.getFechaEntrada(), request.getFechaSalida()
         );
@@ -201,7 +212,11 @@ public class ReservaService {
         
         Pago pago = new Pago();
         pago.setReserva(saved);
-        pago.setMetodoPago(MetodoPago.valueOf(request.getMetodoPago()));
+        try {
+            pago.setMetodoPago(MetodoPago.valueOf(request.getMetodoPago().toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Método de pago inválido");
+        }
         pago.setMonto(montoTotal);
         pago.setEstado(EstadoPago.PENDIENTE);
         pago.setFechaCreacion(LocalDateTime.now());

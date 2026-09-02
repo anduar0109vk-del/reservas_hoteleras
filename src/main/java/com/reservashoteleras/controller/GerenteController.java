@@ -2,8 +2,10 @@ package com.reservashoteleras.controller;
 
 import com.reservashoteleras.entity.Habitacion;
 import com.reservashoteleras.entity.Promocion;
+import com.reservashoteleras.entity.Reserva;
 import com.reservashoteleras.service.HabitacionService;
 import com.reservashoteleras.service.PromocionService;
+import com.reservashoteleras.service.ReservaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +19,12 @@ import java.util.List;
 public class GerenteController {
     private final HabitacionService habitacionService;
     private final PromocionService promocionService;
+    private final ReservaService reservaService;
+
+    @GetMapping("/reservas")
+    public ResponseEntity<List<Reserva>> getReservas() {
+        return ResponseEntity.ok(reservaService.getAllReservas());
+    }
 
     @GetMapping("/habitaciones")
     public ResponseEntity<List<Habitacion>> getHabitaciones() {

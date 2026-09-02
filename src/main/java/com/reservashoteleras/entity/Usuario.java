@@ -1,6 +1,7 @@
 package com.reservashoteleras.entity;
 
 import com.reservashoteleras.entity.enums.TipoDocumento;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,6 +43,7 @@ public class Usuario implements UserDetails {
     private String telefono;
     
     @Column(name = "password_hash", nullable = false)
+    @JsonIgnore
     private String passwordHash;
     
     @ManyToOne
@@ -62,6 +64,7 @@ public class Usuario implements UserDetails {
     }
     
     @Override
+    @JsonIgnore
     public String getPassword() {
         return passwordHash;
     }

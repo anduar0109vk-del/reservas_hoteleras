@@ -1,5 +1,6 @@
 package com.reservashoteleras.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class CheckIn {
     
     @OneToOne
     @JoinColumn(name = "reserva_id", nullable = false, unique = true)
+    @JsonIgnore
     private Reserva reserva;
     
     @Column(name = "fecha_hora_checkin")

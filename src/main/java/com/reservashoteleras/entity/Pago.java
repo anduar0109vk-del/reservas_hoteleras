@@ -3,6 +3,7 @@ package com.reservashoteleras.entity;
 import com.reservashoteleras.entity.enums.EstadoPago;
 import com.reservashoteleras.entity.enums.MetodoPago;
 import com.reservashoteleras.entity.enums.TipoComprobante;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class Pago {
     
     @OneToOne
     @JoinColumn(name = "reserva_id", nullable = false)
+    @JsonIgnore
     private Reserva reserva;
     
     @Enumerated(EnumType.STRING)

@@ -1,61 +1,33 @@
 package com.reservashoteleras.security;
 
 import com.reservashoteleras.entity.Usuario;
-import lombok.Getter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import com.reservashoteleras.repository.UsuarioRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Collections;
 
-@Getter
-public class UsuarioPrincipal implements UserDetails {
-    private final Usuario usuario;
-    
-    public UsuarioPrincipal(Usuario usuario) {
-        this.usuario = usuario;
-    }
+@Service
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService {
+    private final UsuarioRepository usuarioRepository;
     
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(
-            new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre())
-        );
-    }
-    
-    @Override
-    public String getPassword() {
-        return usuario.getPasswordHash();
-    }
-    
-    @Override
-    public String getUsername() {
-        return usuario.getEmail();
-    }
-    
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-    
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-    
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-    
-    @Override
-    public boolean isEnabled() {
-        return usuario.isActivo();
-    }
-    
-    // Método para obtener el ID del usuario
-    public Long getId() {
-        return usuario.getId();
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        System.out.println("🔍 Buscando usuario por email: " + email);
+        
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    System.err.println("❌ Usuario no encontrado: " + email);
+                    return new UsernameNotFoundException("Usuario no encontrado: " + email);
+                });
+        
+        System.out.println("✅ Usuario encontrado: " + usuario.getEmail());
+        System.out.println("🔑 Password en BD: " + usuario.getPasswordHash());
+        System.out.println("👤 Rol: " + usuario.getRol().getNombre());
+        
+        return usuario;
     }
 }

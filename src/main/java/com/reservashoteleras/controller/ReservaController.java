@@ -24,29 +24,29 @@ public class ReservaController {
     
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'RECEPCIONISTA')")
-    public ResponseEntity<List<ReservaDTO>> getAllReservas() {
-        return ResponseEntity.ok(reservaService.getAllReservasDTO());
+    public ResponseEntity<List<Reserva>> getAllReservas() {
+        return ResponseEntity.ok(reservaService.getAllReservas());
     }
     
     @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<List<ReservaDTO>> getByCliente(@PathVariable Long clienteId) {
-        return ResponseEntity.ok(reservaService.getReservasByClienteDTO(clienteId));
+    public ResponseEntity<List<Reserva>> getByCliente(@PathVariable Long clienteId) {
+        return ResponseEntity.ok(reservaService.getReservasByCliente(clienteId));
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ReservaDTO> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(reservaService.getReservaByIdDTO(id));
+    public ResponseEntity<Reserva> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(reservaService.getReservaById(id));
     }
     
     @PostMapping
     public ResponseEntity<Reserva> crearReserva(@RequestBody ReservaRequest request, Authentication auth) {
-        Usuario usuario = (Usuario) auth.getPrincipal();
+        Usuario usuario = obtenerUsuario(auth);
         return ResponseEntity.ok(reservaService.crearReserva(request, usuario.getId()));
     }
     
     @PatchMapping("/{id}/cancelar")
     public ResponseEntity<Reserva> cancelarReserva(@PathVariable Long id, @RequestParam String motivo, Authentication auth) {
-        Usuario usuario = (Usuario) auth.getPrincipal();
+        Usuario usuario = obtenerUsuario(auth);
         return ResponseEntity.ok(reservaService.cancelarReserva(id, motivo, usuario));
     }
     
@@ -70,7 +70,7 @@ public class ReservaController {
             @PathVariable Long reservaId,
             @RequestBody Map<String, Object> request,
             Authentication auth) {
-        Usuario usuario = (Usuario) auth.getPrincipal();
+        Usuario usuario = obtenerUsuario(auth);
         Long servicioId = Long.valueOf(request.get("servicioId").toString());
         Integer cantidad = Integer.valueOf(request.get("cantidad").toString());
         return ResponseEntity.ok(reservaService.agregarServicioAReserva(reservaId, servicioId, cantidad, usuario));
@@ -96,8 +96,15 @@ public class ReservaController {
     public ResponseEntity<Void> eliminarServicioDeReserva(
             @PathVariable Long reservaServicioId,
             Authentication auth) {
-        Usuario usuario = (Usuario) auth.getPrincipal();
+        Usuario usuario = obtenerUsuario(auth);
         reservaService.eliminarServicioDeReserva(reservaServicioId, usuario);
         return ResponseEntity.ok().build();
+    }
+
+    private Usuario obtenerUsuario(Authentication auth) {
+        if (auth.getPrincipal() instanceof Usuario usuario) {
+            return usuario;
+        }
+        throw new IllegalStateException("La sesión autenticada no contiene un usuario válido");
     }
 }

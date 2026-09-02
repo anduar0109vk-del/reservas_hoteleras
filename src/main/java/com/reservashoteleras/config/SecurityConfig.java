@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -34,7 +36,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**", "/api/habitaciones/disponibles", 
                                 "/api/habitaciones/mas-pedidas", "/api/habitaciones/destacadas",
                                 "/api/servicios/disponibles", "/api/clientes/usuario/**").permitAll()
-                .requestMatchers("/api/reclamos/**", "/api/bot/**").permitAll()
+                .requestMatchers("/api/bot/**").permitAll()
                 .requestMatchers("/api/clientes").hasAnyRole("ADMIN", "GERENTE", "RECEPCIONISTA")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/gerente/**").hasAnyRole("ADMIN", "GERENTE")
