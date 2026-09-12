@@ -186,24 +186,50 @@ cd .\reservas-hoteleras
 .\mvnw.cmd test
 ```
 
-## Cómo contribuir
+## Estrategia de ramificación
 
-Si el proyecto se publica como open source:
+El repositorio utiliza Git Flow simplificado:
 
-1. Crear un fork del repositorio.
-2. Crear una rama descriptiva:
+| Rama | Propósito |
+|---|---|
+| `master` | Código estable listo para producción |
+| `develop` | Integración de funcionalidades antes de publicar |
+| `feature/nombre-funcionalidad` | Desarrollo de una funcionalidad específica |
+| `hotfix/nombre-error` | Corrección urgente de errores en producción |
+
+Las ramas `feature/` y `hotfix/` se crean solo cuando existe una tarea
+concreta. No se mantienen ramas vacías en el repositorio.
+
+## Flujo de trabajo
+
+1. Crear una rama `feature/` desde `develop`:
 
    ```bash
-   git checkout -b feature/mejora-reservas
+   git switch develop
+   git pull origin develop
+   git switch -c feature/mejora-reservas
    ```
 
-3. Realizar cambios pequeños y enfocados.
-4. Ejecutar el build del frontend y las pruebas del backend.
-5. Actualizar la documentación si cambias una funcionalidad.
-6. Abrir un Pull Request explicando el problema, la solución y las pruebas
-   realizadas.
+2. Realizar cambios pequeños y commits descriptivos, por ejemplo:
 
-No incluit credenciales, tokens, contraseñas, datos reales de huéspedes ni
+   ```text
+   feat: mejorar el estilo del módulo de reservas
+   ```
+
+3. Ejecutar el build del frontend y las pruebas del backend.
+4. Subir la rama al repositorio remoto:
+
+   ```bash
+   git push -u origin feature/mejora-reservas
+   ```
+
+5. Crear un Pull Request hacia `develop` y solicitar revisión de otro
+   integrante.
+6. Integrar el Pull Request en `develop` después de su aprobación.
+7. Al finalizar la iteración, crear un Pull Request de `develop` hacia
+   `master`.
+
+No incluir credenciales, tokens, contraseñas, datos reales de huéspedes ni
 claves de servicios externos en commits o Pull Requests.
 
 ## Licencia
