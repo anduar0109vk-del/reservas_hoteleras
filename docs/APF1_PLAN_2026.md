@@ -1,9 +1,9 @@
 # Plan APF1 y trazabilidad del sílabo
 
-**Proyecto:** Casa Andina - Sistema de Reservas Hoteleras  
-**Periodo de trabajo:** 11/08/2026 al 12/12/2026  
-**Backend:** Java 21 + Spring Boot  
-**Frontend:** React + Vite  
+**Proyecto:** Casa Andina - Sistema de Reservas Hoteleras
+**Periodo de trabajo:** 11/08/2026 al 12/12/2026
+**Backend:** Java 21 + Spring Boot
+**Frontend:** React + Vite
 **Base de datos:** MySQL/MariaDB
 
 ## Cronograma base para el Gantt
@@ -66,4 +66,3 @@ gantt
 | Control de versiones | Ramas, commits, Pull Requests y `README.md` |
 | Herramientas complementarias | Issues, documentación, workflow de CI |
 | Plataformas de soporte | Workflow de compilación; contenedores y despliegue quedan para APF3/proyecto final |
-
