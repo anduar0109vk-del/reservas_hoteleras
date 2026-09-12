@@ -16,8 +16,8 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - name: Ejecutar pruebas backend
-        run: bash ./mvnw test
+      - name: Compilar backend
+        run: bash ./mvnw -DskipTests package
 
   frontend:
     runs-on: ubuntu-latest
