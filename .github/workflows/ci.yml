@@ -17,7 +17,7 @@ jobs:
           java-version: "21"
           cache: maven
       - name: Ejecutar pruebas backend
-        run: ./mvnw test
+        run: bash ./mvnw test
 
   frontend:
     runs-on: ubuntu-latest
