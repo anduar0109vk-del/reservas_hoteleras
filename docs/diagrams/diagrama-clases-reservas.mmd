@@ -1,0 +1,39 @@
+classDiagram
+    class Usuario {
+      +Long id
+      +String correo
+      +Rol rol
+    }
+    class Cliente {
+      +Long id
+      +String nombres
+      +String documento
+    }
+    class Reserva {
+      +Long id
+      +LocalDate fechaInicio
+      +LocalDate fechaFin
+      +EstadoReserva estado
+      +confirmar()
+      +cancelar()
+    }
+    class Habitacion {
+      +Long id
+      +String numero
+      +EstadoHabitacion estado
+    }
+    class Pago {
+      +Long id
+      +BigDecimal monto
+      +registrar()
+    }
+    class Servicio {
+      +Long id
+      +String nombre
+      +BigDecimal precio
+    }
+    Usuario "1" -- "0..1" Cliente
+    Cliente "1" -- "0..*" Reserva
+    Habitacion "1" -- "0..*" Reserva
+    Reserva "1" -- "0..*" Pago
+    Reserva "1" -- "0..*" Servicio

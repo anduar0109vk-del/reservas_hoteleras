@@ -1,0 +1,14 @@
+flowchart LR
+    Cliente([Cliente]) --> R[Consultar habitaciones]
+    Cliente --> B[Crear y consultar reserva]
+    Cliente --> P[Registrar pago]
+    Cliente --> Q[Registrar reclamo]
+    Recepcion([Recepcionista]) --> G[Gestionar reservas]
+    Recepcion --> H[Gestionar check-in/check-out]
+    Recepcion --> T[Agregar servicios]
+    Gerente([Gerente]) --> D[Consultar dashboards y reportes]
+    Admin([Administrador]) --> U[Administrar usuarios y catalogos]
+    Admin --> D
+    G --> R
+    B --> P
+    H --> D

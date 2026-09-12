@@ -1,0 +1,15 @@
+flowchart TD
+    G[Gerencia general]
+    A[Administracion]
+    R[Recepcion y reservas]
+    C[Atencion al cliente]
+    S[Sistemas y soporte tecnologico]
+    G --> A
+    G --> R
+    G --> C
+    A -. reportes .-> R
+    A -. control .-> C
+    S -. soporte transversal .-> G
+    S -. soporte .-> A
+    S -. soporte .-> R
+    S -. soporte .-> C

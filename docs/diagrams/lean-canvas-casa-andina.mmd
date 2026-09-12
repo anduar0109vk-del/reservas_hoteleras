@@ -1,0 +1,17 @@
+flowchart LR
+    P[Problema<br/>Informacion dispersa<br/>Errores y demoras]
+    S[Segmentos<br/>Huespedes<br/>Recepcionistas<br/>Administracion]
+    V[Propuesta de valor<br/>Reservas y operaciones<br/>centralizadas]
+    SO[Solucion<br/>Web React + API Java<br/>MySQL/MariaDB]
+    C[Canales<br/>Web, recepcion,<br/>WhatsApp]
+    M[Metricas<br/>Reservas confirmadas<br/>Ocupacion<br/>Tiempo de atencion]
+    U[Ventaja especial<br/>Flujo integrado de reserva,<br/>pago y recepcion]
+    I[Ingresos<br/>Alojamiento y servicios]
+    K[Costos<br/>Desarrollo, nube,<br/>soporte y capacitacion]
+    P --> V --> SO
+    S --> V
+    SO --> C
+    SO --> M
+    U --> V
+    SO --> I
+    SO --> K
