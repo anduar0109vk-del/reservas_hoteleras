@@ -49,7 +49,7 @@ Proyectos/
 ## Requisitos del sistema
 
 - Windows 10/11.
-- Java JDK 21.
+- Java JDK 25 (LTS).
 - Node.js 18 o superior y npm.
 - Maven Wrapper incluido en el backend (`mvnw.cmd`).
 - XAMPP con Apache y MySQL/MariaDB.
