@@ -19,6 +19,7 @@ import com.reservashoteleras.repository.UsuarioRepository;
 import com.reservashoteleras.service.HabitacionService;
 import com.reservashoteleras.service.PromocionService;
 import com.reservashoteleras.service.ReporteService;
+import com.reservashoteleras.service.ServicioHabitacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -42,6 +44,7 @@ public class AdminController {
     private final ReservaRepository reservaRepository;
     private final ReporteService reporteService;
     private final ClienteRepository clienteRepository;  // ✅ AGREGAR ESTO
+    private final ServicioHabitacionService servicioHabitacionService;
 
     // ========== USUARIOS ==========
     
@@ -129,20 +132,32 @@ public class AdminController {
     
     @GetMapping("/servicios")
     public ResponseEntity<List<ServicioHabitacion>> getServicios() {
-        return ResponseEntity.ok(servicioHabitacionRepository.findAll());
+        return ResponseEntity.ok(servicioHabitacionService.getAllServicios());
     }
     
     @PostMapping("/servicios")
     public ResponseEntity<ServicioHabitacion> crearServicio(@RequestBody ServicioHabitacion servicio) {
-        return ResponseEntity.ok(servicioHabitacionRepository.save(servicio));
+        return ResponseEntity.ok(servicioHabitacionService.crearServicio(
+            servicio.getNombre(),
+            servicio.getCategoria(),
+            servicio.getDescripcion(),
+            servicio.getPrecio(),
+            servicio.getUrlImagen(),
+            servicio.getStock()
+        ));
+    }
+
+    @PatchMapping("/servicios/{id}/stock")
+    public ResponseEntity<ServicioHabitacion> actualizarStockServicio(
+            @PathVariable Long id, @RequestBody Map<String, Integer> request) {
+        return ResponseEntity.ok(servicioHabitacionService.actualizarStock(id, request.get("stock")));
     }
     
     @PatchMapping("/servicios/{id}/toggle")
-    public ResponseEntity<ServicioHabitacion> toggleServicio(@PathVariable Long id, @RequestBody boolean disponible) {
-        ServicioHabitacion servicio = servicioHabitacionRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
-        servicio.setDisponible(disponible);
-        return ResponseEntity.ok(servicioHabitacionRepository.save(servicio));
+    public ResponseEntity<ServicioHabitacion> toggleServicio(
+            @PathVariable Long id, @RequestBody Map<String, Boolean> request) {
+        return ResponseEntity.ok(servicioHabitacionService.cambiarDisponibilidad(
+                id, request.get("disponible")));
     }
     
     @DeleteMapping("/servicios/{id}")

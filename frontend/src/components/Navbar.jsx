@@ -1,8 +1,26 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import logoCasaAndina from '../assets/casa-andina-logo.png';
+
+const NavigationSection = ({ title, links }) => (
+  <section className="hotel-nav-section" aria-label={title}>
+    <h2 className="hotel-nav-section__title">{title}</h2>
+    <div className="hotel-nav-grid">
+      {links.map(({ to, icon, label }) => (
+        <NavLink
+          key={to}
+          to={to}
+          className={({ isActive }) => `hotel-nav-card${isActive ? ' is-active' : ''}`}
+        >
+          <span className="hotel-nav-card__icon" aria-hidden="true">{icon}</span>
+          <span className="hotel-nav-card__label">{label}</span>
+        </NavLink>
+      ))}
+    </div>
+  </section>
+);
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -18,127 +36,72 @@ const Navbar = () => {
   const isGerente = user?.rol === 'GERENTE' || isAdmin;
   const isRecepcionista = user?.rol === 'RECEPCIONISTA' || isGerente;
 
+  const primaryLinks = [
+    { to: '/dashboard', icon: '📊', label: 'Dashboard' },
+    { to: '/habitaciones', icon: '🛏️', label: 'Habitaciones' },
+    { to: '/mis-reservas', icon: '📋', label: 'Mis reservas' },
+    { to: '/nueva-reserva', icon: '➕', label: 'Nueva reserva' },
+    { to: '/servicios', icon: '🛎️', label: 'Servicios' },
+    { to: '/perfil', icon: '👤', label: 'Perfil' },
+    { to: '/reclamos', icon: '📖', label: 'Reclamos' },
+    { to: '/manual', icon: '📘', label: 'Manual de usuario' },
+  ];
+
+  const operationLinks = [];
+  if (isRecepcionista) {
+    operationLinks.push(
+      { to: '/todas-reservas', icon: '📋', label: 'Todas las reservas' },
+      { to: '/recepcion', icon: '🏨', label: 'Recepción' }
+    );
+  }
+  if (isGerente) {
+    operationLinks.push({ to: '/gerente', icon: '📊', label: 'Gerencia' });
+  }
+
+  const adminLinks = isAdmin
+    ? [
+        { to: '/admin', icon: '🔧', label: 'Panel de administración' },
+        { to: '/admin/usuarios', icon: '👥', label: 'Usuarios' },
+        { to: '/admin/habitaciones', icon: '🛏️', label: 'Gestión de habitaciones' },
+        { to: '/admin/promociones', icon: '🎯', label: 'Promociones' },
+        { to: '/admin/servicios', icon: '🛎️', label: 'Gestión de servicios' },
+        { to: '/admin/reportes', icon: '📊', label: 'Reportes' },
+      ]
+    : [];
+
   return (
-    <nav style={styles.navbar}>
-      <div style={styles.container}>
-        <Link to="/dashboard" style={styles.brand}>
-          <img src={logoCasaAndina} alt="Casa Andina Hoteles" style={styles.logo} />
-        </Link>
-        <div style={styles.navLinks}>
-          <Link to="/dashboard" style={styles.link}>Dashboard</Link>
-          <Link to="/habitaciones" style={styles.link}>Habitaciones</Link>
-          <Link to="/mis-reservas" style={styles.link}>Mis Reservas</Link>
-          <Link to="/nueva-reserva" style={styles.link}>Nueva Reserva</Link>
-          <Link to="/servicios" style={styles.link}>Servicios</Link>
-          <Link to="/perfil" style={styles.link}>Perfil</Link>
-          <Link to="/reclamos" style={styles.link}>📖 Reclamos</Link>
-          <Link to="/manual" style={styles.link}>📘 Manual</Link>
-          
-          {/* RECEPCIONISTA y superiores */}
-          {(isAdmin || isGerente || isRecepcionista) && (
-            <>
-              <Link to="/todas-reservas" style={styles.link}>📋 Todas Reservas</Link>
-              <Link to="/recepcion" style={styles.link}>🏨 Recepción</Link>
-            </>
-          )}
-          
-          {/* GERENTE y ADMIN */}
-          {(isAdmin || isGerente) && (
-            <Link to="/gerente" style={styles.link}>📊 Gerencia</Link>
-          )}
-          
-          {/* Solo ADMIN */}
-          {isAdmin && (
-            <>
-              <Link to="/admin" style={styles.link}>🔧 Admin Panel</Link>
-              <Link to="/admin/usuarios" style={styles.link}>👥 Usuarios</Link>
-              <Link to="/admin/habitaciones" style={styles.link}>🛏️ Habitaciones</Link>
-              <Link to="/admin/promociones" style={styles.link}>🎯 Promociones</Link>
-              <Link to="/admin/servicios" style={styles.link}>🛎️ Servicios</Link>
-              <Link to="/admin/reportes" style={styles.link}>📊 Reportes</Link>
-            </>
-          )}
-          
-          <span style={styles.userInfo}>👤 {user?.nombres} ({user?.rol})</span>
-          <button onClick={toggleTheme} style={styles.themeBtn} aria-label="Cambiar tema">
-            {theme === 'light' ? '🌙 Oscuro' : '☀️ Claro'}
-          </button>
-          <button onClick={handleLogout} style={styles.logoutBtn}>
-            Cerrar Sesión
-          </button>
+    <nav className="hotel-navbar">
+      <div className="hotel-navbar__inner">
+        <div className="hotel-navbar__header">
+          <NavLink to="/dashboard" className="hotel-navbar__brand" aria-label="Ir al dashboard">
+            <img src={logoCasaAndina} alt="Casa Andina Hoteles" />
+          </NavLink>
+          <div className="hotel-navbar__actions">
+            <span className="hotel-navbar__user">👤 {user?.nombres} · {user?.rol}</span>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="hotel-navbar__theme"
+              aria-label="Cambiar tema"
+            >
+              {theme === 'light' ? '🌙 Oscuro' : '☀️ Claro'}
+            </button>
+            <button type="button" onClick={handleLogout} className="hotel-navbar__logout">
+              Cerrar sesión
+            </button>
+          </div>
         </div>
+
+        <NavigationSection title="Navegación principal" links={primaryLinks} />
+        {operationLinks.length > 0 && (
+          <NavigationSection title="Operaciones y supervisión" links={operationLinks} />
+        )}
+        {adminLinks.length > 0 && (
+          <NavigationSection title="Administración" links={adminLinks} />
+        )}
       </div>
     </nav>
   );
-};
-
-const styles = {
-  navbar: {
-    backgroundColor: '#1a365d',
-    color: 'white',
-    padding: '12px 0',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-  },
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '0 20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  brand: {
-    display: 'flex',
-    alignItems: 'center',
-    textDecoration: 'none',
-  },
-  logo: {
-    width: '140px',
-    height: '42px',
-    objectFit: 'contain',
-    objectPosition: 'center',
-    backgroundColor: '#1a365d',
-  },
-  navLinks: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    flexWrap: 'wrap',
-  },
-  link: {
-    color: 'white',
-    textDecoration: 'none',
-    fontSize: '14px',
-    padding: '6px 12px',
-    borderRadius: '4px',
-    transition: 'background-color 0.2s',
-  },
-  userInfo: {
-    fontSize: '14px',
-    color: '#bee3f8',
-    padding: '6px 12px',
-  },
-  logoutBtn: {
-    backgroundColor: '#e53e3e',
-    color: 'white',
-    padding: '6px 16px',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: '500',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  },
-  themeBtn: {
-    backgroundColor: '#2c5282',
-    color: 'white',
-    padding: '6px 12px',
-    borderRadius: '6px',
-    fontSize: '14px',
-    border: '1px solid #90cdf4',
-    cursor: 'pointer',
-  },
 };
 
 export default Navbar;

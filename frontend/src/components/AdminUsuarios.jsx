@@ -18,7 +18,6 @@ const AdminUsuarios = () => {
     password: '',
     rol: 'CLIENTE'
   });
-  const [editando, setEditando] = useState(null);
 
   useEffect(() => {
     cargarUsuarios();
@@ -28,7 +27,7 @@ const AdminUsuarios = () => {
     try {
       const response = await api.get('/admin/usuarios');
       setUsuarios(response.data);
-    } catch (error) {
+    } catch {
       setError('Error al cargar usuarios');
     } finally {
       setLoading(false);
@@ -67,7 +66,7 @@ const AdminUsuarios = () => {
       await api.delete(`/admin/usuarios/${id}`);
       alert('✅ Usuario eliminado');
       cargarUsuarios();
-    } catch (error) {
+    } catch {
       alert('❌ Error al eliminar');
     }
   };

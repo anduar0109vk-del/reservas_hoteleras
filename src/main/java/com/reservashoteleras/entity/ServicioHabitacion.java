@@ -35,6 +35,9 @@ public class ServicioHabitacion {
     
     private Boolean disponible = true;
 
+    @Column(nullable = false)
+    private Integer stock = 0;
+
     // ✅ Métodos explícitos
     public void setDisponible(boolean disponible) {
         this.disponible = disponible;
@@ -58,5 +61,9 @@ public class ServicioHabitacion {
 
     public void setUrlImagen(String urlImagen) {
         this.urlImagen = urlImagen;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 }

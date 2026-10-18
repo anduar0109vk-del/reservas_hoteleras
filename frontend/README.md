@@ -1,16 +1,23 @@
-# React + Vite
+# Frontend de reservas hoteleras
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicación web desarrollada con React y Vite. Para instalar el sistema completo,
+configurar MySQL Server y ejecutar el backend, sigue las instrucciones del
+[README principal](../README.md).
 
-Currently, two official plugins are available:
+Desde la raíz del repositorio:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```powershell
+cd .\frontend
+npm ci
+npm run dev
+```
 
-## React Compiler
+Vite inicia en `http://localhost:5171` y envía las solicitudes `/api` al backend
+local en `http://localhost:39000`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Para verificar el frontend:
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```powershell
+npm run build
+npx oxlint src
+```

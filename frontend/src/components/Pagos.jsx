@@ -12,13 +12,11 @@ const Pagos = () => {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [metodoPago, setMetodoPago] = useState('TARJETA');
-
-  // Datos de tarjeta
+  const [metodoPago, setMetodoPago] = useState('DEMO');
   const [tarjeta, setTarjeta] = useState({
     numero: '',
-    nombre: '',
-    fechaExpiracion: '',
+    titular: '',
+    expiracion: '',
     cvv: '',
     cci: ''
   });
@@ -39,31 +37,41 @@ const Pagos = () => {
     }
   };
 
-  const handleTarjetaChange = (e) => {
-    const { name, value } = e.target;
-    setTarjeta(prev => ({ ...prev, [name]: value }));
+  const actualizarTarjeta = (event) => {
+    const { name, value } = event.target;
+    const digitLimits = { numero: 19, expiracion: 4, cvv: 4, cci: 20 };
+    const nextValue = digitLimits[name]
+      ? value.replace(/\D/g, '').slice(0, digitLimits[name])
+      : value;
+    setTarjeta((current) => ({ ...current, [name]: nextValue }));
   };
 
-  const formatearNumeroTarjeta = (value) => {
-    const cleaned = value.replace(/\D/g, '');
-    const groups = cleaned.match(/.{1,4}/g) || [];
-    return groups.join(' ');
-  };
+  const validarTarjetaDemo = () => {
+    const numero = tarjeta.numero;
+    if (numero.length < 13 || numero.length > 19 || !pasaValidacionLuhn(numero)) {
+      return 'Ingresa un número de tarjeta válido.';
+    }
+    if (tarjeta.titular.trim().length < 3) {
+      return 'Ingresa el nombre del titular.';
+    }
+    if (!/^\d{4}$/.test(tarjeta.expiracion)) {
+      return 'Ingresa la fecha de vencimiento en formato MM/AA.';
+    }
 
-  const formatearFechaExpiracion = (value) => {
-    const cleaned = value.replace(/\D/g, '');
-    if (cleaned.length <= 2) return cleaned;
-    return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
-  };
-
-  const handleNumeroTarjetaChange = (e) => {
-    const formatted = formatearNumeroTarjeta(e.target.value);
-    setTarjeta(prev => ({ ...prev, numero: formatted }));
-  };
-
-  const handleFechaExpiracionChange = (e) => {
-    const formatted = formatearFechaExpiracion(e.target.value);
-    setTarjeta(prev => ({ ...prev, fechaExpiracion: formatted }));
+    const mes = Number(tarjeta.expiracion.slice(0, 2));
+    const anio = 2000 + Number(tarjeta.expiracion.slice(2, 4));
+    const hoy = new Date();
+    if (mes < 1 || mes > 12 || anio < hoy.getFullYear()
+        || (anio === hoy.getFullYear() && mes < hoy.getMonth() + 1)) {
+      return 'La tarjeta está vencida o la fecha no es válida.';
+    }
+    if (!/^\d{3,4}$/.test(tarjeta.cvv)) {
+      return 'El CVV debe tener 3 o 4 dígitos.';
+    }
+    if (tarjeta.cci && !/^\d{20}$/.test(tarjeta.cci)) {
+      return 'El CCI debe tener 20 dígitos.';
+    }
+    return '';
   };
 
   const handlePago = async () => {
@@ -72,35 +80,20 @@ const Pagos = () => {
     setSuccess('');
 
     try {
-      // Validar datos de tarjeta
-      if (metodoPago === 'TARJETA') {
-        const numeroLimpio = tarjeta.numero.replace(/\s/g, '');
-        if (numeroLimpio.length < 16) {
-          setError('Número de tarjeta inválido (debe tener 16 dígitos)');
-          setProcessing(false);
-          return;
-        }
-        if (tarjeta.cvv.length < 3) {
-          setError('CVV inválido (debe tener 3 dígitos)');
-          setProcessing(false);
-          return;
-        }
-        if (tarjeta.nombre.length < 3) {
-          setError('Nombre del titular es obligatorio');
-          setProcessing(false);
-          return;
-        }
+      if (metodoPago === 'EFECTIVO') {
+        setSuccess('La reserva sigue pendiente. El pago se registrará en recepción cuando llegues al hotel.');
+        return;
       }
 
-      const response = await api.post(`/pagos/crear-intent/${reservaId}`);
-      const { clientSecret } = response.data;
+      const validationMessage = validarTarjetaDemo();
+      if (validationMessage) {
+        setError(validationMessage);
+        return;
+      }
 
-      // Simular pago exitoso (en producción usar Stripe Elements)
-      await api.post('/pagos/confirmar', {
-        paymentIntentId: clientSecret.split('_secret_')[0]
-      });
+      await api.post(`/pagos/demo/${reservaId}`);
 
-      setSuccess('✅ Pago realizado exitosamente');
+      setSuccess('Pago de demostración registrado. No se realizó ningún cobro.');
       setTimeout(() => navigate('/mis-reservas'), 2000);
     } catch (error) {
       setError(error.response?.data?.message || 'Error al procesar el pago');
@@ -132,7 +125,7 @@ const Pagos = () => {
       <Navbar />
       <div style={styles.container}>
         <div className="card" style={styles.card}>
-          <h2 style={styles.title}>💳 Realizar Pago</h2>
+          <h2 style={styles.title}>💳 Pago de reserva</h2>
 
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
@@ -181,111 +174,99 @@ const Pagos = () => {
               onChange={(e) => setMetodoPago(e.target.value)}
               style={styles.metodoSelect}
             >
-              <option value="TARJETA">💳 Tarjeta (Stripe)</option>
-              <option value="YAPE">📱 Yape</option>
-              <option value="PLIN">📱 Plin</option>
+              <option value="DEMO">Simulación local (sin cobro real)</option>
               <option value="EFECTIVO">💵 Efectivo (en hotel)</option>
             </select>
           </div>
 
-          {/* Formulario de tarjeta */}
-          {metodoPago === 'TARJETA' && (
-            <div style={styles.tarjetaContainer}>
-              <h4 style={styles.tarjetaTitle}>Datos de la Tarjeta</h4>
-              
-              <div style={styles.field}>
-                <label style={styles.label}>Número de Tarjeta *</label>
-                <input
-                  type="text"
-                  name="numero"
-                  value={tarjeta.numero}
-                  onChange={handleNumeroTarjetaChange}
-                  style={styles.input}
-                  placeholder="1234 5678 9012 3456"
-                  maxLength="19"
-                  required
-                />
+          {metodoPago === 'DEMO' && (
+            <>
+              <div style={styles.demoNotice}>
+                Modo de demostración: completa los campos para validar el formulario.
+                Los datos se usan solo en esta pantalla; no se envían ni guardan y no
+                se realiza ningún cobro.
               </div>
-
-              <div style={styles.field}>
-                <label style={styles.label}>Nombre del Titular *</label>
-                <input
-                  type="text"
-                  name="nombre"
-                  value={tarjeta.nombre}
-                  onChange={handleTarjetaChange}
-                  style={styles.input}
-                  placeholder="JUAN PEREZ"
-                  required
-                />
-              </div>
-
-              <div style={styles.row}>
+              <div style={styles.tarjetaContainer}>
                 <div style={styles.field}>
-                  <label style={styles.label}>Fecha Expiración *</label>
+                  <label style={styles.label} htmlFor="card-number">Número de tarjeta *</label>
                   <input
+                    id="card-number"
+                    name="numero"
                     type="text"
-                    name="fechaExpiracion"
-                    value={tarjeta.fechaExpiracion}
-                    onChange={handleFechaExpiracionChange}
-                    style={styles.input}
-                    placeholder="MM/AA"
-                    maxLength="5"
+                    inputMode="numeric"
+                    autoComplete="cc-number"
+                    value={tarjeta.numero}
+                    onChange={actualizarTarjeta}
+                    placeholder="Número de 13 a 19 dígitos"
                     required
                   />
                 </div>
                 <div style={styles.field}>
-                  <label style={styles.label}>CVV *</label>
+                  <label style={styles.label} htmlFor="card-holder">Titular *</label>
                   <input
-                    type="password"
-                    name="cvv"
-                    value={tarjeta.cvv}
-                    onChange={handleTarjetaChange}
-                    style={styles.input}
-                    placeholder="123"
-                    maxLength="4"
+                    id="card-holder"
+                    name="titular"
+                    type="text"
+                    autoComplete="cc-name"
+                    value={tarjeta.titular}
+                    onChange={actualizarTarjeta}
+                    placeholder="Nombre como aparece en la tarjeta"
                     required
                   />
                 </div>
+                <div style={styles.row}>
+                  <div style={styles.field}>
+                    <label style={styles.label} htmlFor="card-expiry">Vencimiento (MM/AA) *</label>
+                    <input
+                      id="card-expiry"
+                      name="expiracion"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="cc-exp"
+                      value={tarjeta.expiracion.length > 2
+                        ? `${tarjeta.expiracion.slice(0, 2)}/${tarjeta.expiracion.slice(2)}`
+                        : tarjeta.expiracion}
+                      onChange={actualizarTarjeta}
+                      placeholder="MM/AA"
+                      required
+                    />
+                  </div>
+                  <div style={styles.field}>
+                    <label style={styles.label} htmlFor="card-cvv">CVV *</label>
+                    <input
+                      id="card-cvv"
+                      name="cvv"
+                      type="password"
+                      inputMode="numeric"
+                      autoComplete="cc-csc"
+                      value={tarjeta.cvv}
+                      onChange={actualizarTarjeta}
+                      placeholder="123"
+                      required
+                    />
+                  </div>
+                </div>
+                <div style={styles.field}>
+                  <label style={styles.label} htmlFor="card-cci">CCI (opcional)</label>
+                  <input
+                    id="card-cci"
+                    name="cci"
+                    type="text"
+                    inputMode="numeric"
+                    value={tarjeta.cci}
+                    onChange={actualizarTarjeta}
+                    placeholder="20 dígitos"
+                  />
+                </div>
               </div>
-
-              <div style={styles.field}>
-                <label style={styles.label}>CCI (Código de Cuenta Interbancaria)</label>
-                <input
-                  type="text"
-                  name="cci"
-                  value={tarjeta.cci}
-                  onChange={handleTarjetaChange}
-                  style={styles.input}
-                  placeholder="12345678901234567890"
-                  maxLength="20"
-                />
-                <span style={styles.helpText}>Opcional para transferencias</span>
-              </div>
-            </div>
+            </>
           )}
 
-          {/* Yape / Plin */}
-          {(metodoPago === 'YAPE' || metodoPago === 'PLIN') && (
-            <div style={styles.yapeContainer}>
-              <p style={styles.yapeText}>
-                📱 Escanea el código QR o usa el número:
-              </p>
-              <div style={styles.yapeNumber}>
-                <span>📞 999 888 777</span>
-              </div>
-              <div style={styles.qrPlaceholder}>
-                <span style={styles.qrIcon}>📱</span>
-                <p>Escanea el código QR desde tu aplicación</p>
-              </div>
-            </div>
-          )}
-
-          {/* Efectivo */}
           {metodoPago === 'EFECTIVO' && (
             <div style={styles.efectivoContainer}>
               <p style={styles.efectivoText}>
-                💵 El pago se realizará al llegar al hotel.
+                💵 La reserva permanecerá pendiente hasta que el personal registre
+                el pago en recepción.
               </p>
               <p>Presenta este código al recepcionista:</p>
               <div style={styles.codigoReservaPago}>
@@ -300,14 +281,18 @@ const Pagos = () => {
               onClick={() => navigate('/mis-reservas')}
               disabled={processing}
             >
-              Cancelar
+              Volver a mis reservas
             </button>
             <button 
               className="btn-success"
               onClick={handlePago}
               disabled={processing}
             >
-              {processing ? 'Procesando...' : `Pagar S/${reserva.montoTotal}`}
+              {processing
+                ? 'Procesando...'
+                : metodoPago === 'DEMO'
+                  ? 'Registrar simulación (sin cobro)'
+                  : 'Dejar pendiente para pagar en el hotel'}
             </button>
           </div>
         </div>
@@ -321,6 +306,28 @@ const styles = {
     maxWidth: '600px',
     margin: '40px auto',
     padding: '0 20px',
+  },
+  tarjetaContainer: {
+    padding: '16px',
+    backgroundColor: '#f7fafc',
+    borderRadius: '8px',
+    marginBottom: '20px',
+  },
+  field: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    marginBottom: '12px',
+  },
+  label: {
+    fontWeight: '600',
+    color: '#2d3748',
+    fontSize: '14px',
+  },
+  row: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '16px',
   },
   card: {
     padding: '32px',
@@ -395,73 +402,13 @@ const styles = {
     fontSize: '16px',
     backgroundColor: 'white',
   },
-  tarjetaContainer: {
+  demoNotice: {
     padding: '16px',
     backgroundColor: '#f7fafc',
     borderRadius: '8px',
     marginBottom: '20px',
-  },
-  tarjetaTitle: {
-    marginBottom: '12px',
-    color: '#2d3748',
-  },
-  field: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    marginBottom: '12px',
-  },
-  label: {
-    fontWeight: '600',
-    color: '#2d3748',
-    fontSize: '14px',
-  },
-  input: {
-    padding: '10px 14px',
-    border: '1px solid #e2e8f0',
-    borderRadius: '8px',
-    fontSize: '16px',
-    width: '100%',
-  },
-  row: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '16px',
-  },
-  helpText: {
-    fontSize: '12px',
-    color: '#718096',
-    marginTop: '2px',
-  },
-  yapeContainer: {
-    padding: '16px',
-    backgroundColor: '#f7fafc',
-    borderRadius: '8px',
-    marginBottom: '20px',
-    textAlign: 'center',
-  },
-  yapeText: {
-    fontSize: '16px',
-    color: '#2d3748',
-  },
-  yapeNumber: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#2b6cb0',
-    padding: '16px',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    margin: '12px 0',
-  },
-  qrPlaceholder: {
-    padding: '20px',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    border: '2px dashed #e2e8f0',
-  },
-  qrIcon: {
-    fontSize: '48px',
-    display: 'block',
+    color: '#744210',
+    border: '1px solid #f6ad55',
   },
   efectivoContainer: {
     padding: '16px',
@@ -490,3 +437,18 @@ const styles = {
 };
 
 export default Pagos;
+
+function pasaValidacionLuhn(numero) {
+  let suma = 0;
+  let duplicar = false;
+  for (let index = numero.length - 1; index >= 0; index -= 1) {
+    let digito = Number(numero[index]);
+    if (duplicar) {
+      digito *= 2;
+      if (digito > 9) digito -= 9;
+    }
+    suma += digito;
+    duplicar = !duplicar;
+  }
+  return suma % 10 === 0;
+}

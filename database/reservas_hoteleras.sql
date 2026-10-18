@@ -1,11 +1,4 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Servidor: 127.0.0.1
--- Tiempo de generación: 14-09-2026 a las 00:21:53
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Esquema y datos iniciales para importar desde MySQL Workbench.
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +13,11 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `reservas_hoteleras`
 --
+
+CREATE DATABASE IF NOT EXISTS `reservas_hoteleras`
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+USE `reservas_hoteleras`;
 
 -- --------------------------------------------------------
 
@@ -380,22 +378,35 @@ CREATE TABLE `servicios_habitacion` (
   `descripcion` varchar(255) DEFAULT NULL,
   `precio` decimal(38,2) NOT NULL,
   `url_imagen` varchar(255) DEFAULT NULL,
-  `disponible` tinyint(1) NOT NULL DEFAULT 1
+  `disponible` tinyint(1) NOT NULL DEFAULT 1,
+  `stock` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `servicios_habitacion`
 --
 
-INSERT INTO `servicios_habitacion` (`id`, `nombre`, `categoria`, `descripcion`, `precio`, `url_imagen`, `disponible`) VALUES
-(1, 'Agua Mineral', 'BEBIDA', 'Botella de agua mineral 500ml', 5.00, NULL, 1),
-(2, 'Cerveza', 'BEBIDA', 'Cerveza artesanal 330ml', 8.00, NULL, 1),
-(3, 'Ceviche', 'COMIDA', 'Ceviche de pescado con limón', 25.00, NULL, 1),
-(4, 'Lomo Saltado', 'COMIDA', 'Lomo saltado con arroz y papas', 30.00, NULL, 1),
-(5, 'Pizza', 'COMIDA', 'Pizza margarita familiar', 35.00, NULL, 1),
-(6, 'Netflix', 'ENTRETENIMIENTO', 'Acceso a Netflix Premium', 10.00, NULL, 1),
-(7, 'HBO Max', 'ENTRETENIMIENTO', 'Acceso a HBO Max', 12.00, NULL, 1),
-(8, 'Pollo ', 'COMIDA', 'Pollo Frito con arroz ', 20.00, '', 1);
+INSERT INTO `servicios_habitacion` (`id`, `nombre`, `categoria`, `descripcion`, `precio`, `url_imagen`, `disponible`, `stock`) VALUES
+(1, 'Agua Mineral', 'BEBIDA', 'Botella de agua mineral 500ml', 5.00, NULL, 1, 50),
+(2, 'Cerveza', 'BEBIDA', 'Cerveza artesanal 330ml', 8.00, NULL, 1, 24),
+(3, 'Ceviche', 'COMIDA', 'Ceviche de pescado con limón', 25.00, NULL, 1, 15),
+(4, 'Lomo Saltado', 'COMIDA', 'Lomo saltado con arroz y papas', 30.00, NULL, 1, 15),
+(5, 'Pizza', 'COMIDA', 'Pizza margarita familiar', 35.00, NULL, 1, 12),
+(6, 'Netflix', 'ENTRETENIMIENTO', 'Acceso a Netflix Premium', 10.00, NULL, 1, 30),
+(7, 'HBO Max', 'ENTRETENIMIENTO', 'Acceso a HBO Max', 12.00, NULL, 1, 30),
+(8, 'Pollo ', 'COMIDA', 'Pollo Frito con arroz ', 20.00, '', 1, 15),
+(9, 'Desayuno buffet', 'COMIDA', 'Desayuno buffet para un huésped', 35.00, NULL, 1, 30),
+(10, 'Ají de gallina', 'COMIDA', 'Ají de gallina con arroz y papa', 28.00, NULL, 1, 15),
+(11, 'Arroz chaufa', 'COMIDA', 'Arroz chaufa de pollo preparado al momento', 26.00, NULL, 1, 15),
+(12, 'Ensalada andina', 'COMIDA', 'Quinua, vegetales frescos y queso', 22.00, NULL, 1, 12),
+(13, 'Sándwich club', 'COMIDA', 'Sándwich club con papas doradas', 24.00, NULL, 1, 12),
+(14, 'Alquiler de bicicleta', 'ENTRETENIMIENTO', 'Bicicleta por hora para recorrer la ciudad', 30.00, NULL, 1, 4),
+(15, 'Juegos de mesa', 'ENTRETENIMIENTO', 'Préstamo de juegos de mesa durante la estadía', 12.00, NULL, 1, 8),
+(16, 'Tour centro histórico', 'ENTRETENIMIENTO', 'Paseo guiado por el centro histórico', 60.00, NULL, 1, 10),
+(17, 'Karaoke privado', 'ENTRETENIMIENTO', 'Sala de karaoke privada por una hora', 50.00, NULL, 1, 2),
+(18, 'Película premium', 'ENTRETENIMIENTO', 'Acceso a una película premium en la habitación', 15.00, NULL, 1, 30),
+(19, 'Sesión de videojuegos', 'ENTRETENIMIENTO', 'Préstamo de consola y videojuegos por hora', 25.00, NULL, 1, 3),
+(20, 'Clase de cocina peruana', 'ENTRETENIMIENTO', 'Clase grupal de cocina para huéspedes', 75.00, NULL, 1, 8);
 
 -- --------------------------------------------------------
 
@@ -741,7 +752,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `servicios_habitacion`
 --
 ALTER TABLE `servicios_habitacion`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos_habitacion`

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import logoCasaAndina from '../assets/casa-andina-logo.png';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -71,7 +72,6 @@ const Login = () => {
     });
 
     if (result.success) {
-      setSuccess('✅ Registro exitoso. Ahora inicia sesión.');
       setSuccess('✅ Usuario registrado correctamente. Ahora inicia sesión.');
       setTimeout(() => {
         setIsLogin(true);
@@ -90,9 +90,11 @@ const Login = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>🏨 Sistema de Reservas</h2>
+    <div className="login-screen" style={styles.container}>
+      <div className="login-card" style={styles.card}>
+        <div className="login-brand">
+          <img className="login-logo" src={logoCasaAndina} alt="Casa Andina Hoteles" />
+        </div>
         <p style={styles.subtitle}>{isLogin ? 'Iniciar Sesión' : 'Registrar Usuario'}</p>
 
         {error && <div className="error-message">{error}</div>}
@@ -136,10 +138,11 @@ const Login = () => {
               </span>
             </p>
 
-            <div style={styles.credentials}>
+            <div className="login-credentials" style={styles.credentials}>
               <p>📋 Credenciales de prueba:</p>
               <p><strong>Admin:</strong> admin@hotel.com / admin123</p>
               <p><strong>Gerente:</strong> gerente@hotel.com / gerente123</p>
+              <p><strong>Recepcionista:</strong> recepcion@hotel.com / recepcion123</p>
               <p><strong>Cliente:</strong> cliente@hotel.com / cliente123</p>
             </div>
           </form>

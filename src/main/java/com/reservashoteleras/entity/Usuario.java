@@ -44,6 +44,7 @@ public class Usuario implements UserDetails {
     
     @Column(name = "password_hash", nullable = false)
     @JsonIgnore
+    @lombok.ToString.Exclude
     private String passwordHash;
     
     @ManyToOne

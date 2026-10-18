@@ -27,6 +27,9 @@ public class HabitacionService {
     }
     
     public List<Habitacion> getDisponiblesEntreFechas(LocalDate entrada, LocalDate salida) {
+        if (entrada == null || salida == null || !salida.isAfter(entrada)) {
+            throw new IllegalArgumentException("Las fechas de entrada y salida deben ser válidas");
+        }
         return habitacionRepository.findDisponiblesEntreFechas(entrada, salida);
     }
     

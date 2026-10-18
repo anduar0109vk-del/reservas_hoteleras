@@ -62,7 +62,7 @@ const AdminReportes = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (error) {
+    } catch {
       alert('❌ Error al generar reporte PDF');
     }
   };
@@ -77,7 +77,7 @@ const AdminReportes = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (error) {
+    } catch {
       alert('❌ Error al generar reporte Excel');
     }
   };
@@ -93,7 +93,7 @@ const AdminReportes = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (error) {
+    } catch {
       alert('❌ Error al generar reporte CSV');
     }
   };

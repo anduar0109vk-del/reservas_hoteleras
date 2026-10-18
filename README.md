@@ -1,238 +1,148 @@
-# Casa Andina - Sistema de Gestión de reservas hoteleras
+# Casa Andina - Sistema de reservas
 
-Sistema web para administrar reservas hoteleras, huéspedes, habitaciones,
-servicios, pagos, facturación y operaciones de recepción. La aplicación incluye
-accesos por rol, seguimiento de reclamos, reportes descargables y un asistente
-web para clientes con acceso directo a WhatsApp.
+Este proyecto es un sistema web para gestionar las reservas y algunas tareas
+diarias de un hotel. Incluye una página para clientes y opciones de trabajo
+para recepción, gerencia y administración.
 
-## Qué hace el proyecto
+## Funciones principales
 
-### Funcionalidades principales
+- Registro e inicio de sesión según el tipo de usuario.
+- Consulta de habitaciones y creación y seguimiento de reservas.
+- Check-in, check-out y gestión de habitaciones.
+- Pagos, servicios adicionales y comprobantes en PDF.
+- Reportes en PDF, Excel y CSV.
+- Registro y seguimiento de reclamos.
+- Manual de usuario y chatbot para clientes.
+- Cambio entre tema claro y oscuro.
 
-- Autenticación mediante JWT.
-- Acceso diferenciado para `ADMIN`, `GERENTE`, `RECEPCIONISTA` y `CLIENTE`.
-- Consulta de habitaciones disponibles, tipos, precios y estados.
-- Creación, consulta, confirmación y cancelación de reservas.
-- Gestión del ciclo de recepción:
-  - Check-in.
-  - Check-out.
-  - Liberación de la habitación al finalizar la estadía.
-- Pagos asociados a reservas.
-- Agregado de servicios a la habitación.
-- Generación de comprobantes detallados en PDF:
-  - Alojamiento.
-  - Servicios.
-  - Descuentos.
-  - Importe neto.
-  - IGV del 18 %.
-  - Total con IGV.
-- Paneles y dashboards para administración, gerencia y recepción.
-- Reportes descargables en PDF, Excel y CSV.
-- Libro de reclamaciones:
-  - Registro y consulta para clientes.
-  - Gestión de estados y respuestas para personal autorizado.
-- Manual de usuario dentro del sistema.
-- Tema claro/oscuro.
-- Chatbot web exclusivo para clientes con respuestas sobre reservas,
-  habitaciones, pagos, servicios, check-in, check-out y reclamos.
-- Botón de contacto directo por WhatsApp al número configurado del hotel.
+## Tecnologías
 
-## Estructura del proyecto
+- Backend: Java 25, Spring Boot y Maven.
+- Frontend: React y Vite.
+- Base de datos: MySQL 8.
 
-```text
-Proyectos/
-├── frontend/              # Aplicación React + Vite
-├── reservas-hoteleras/    # API Spring Boot
-└── README.md
-```
+MySQL Workbench sirve para conectarse y administrar la base de datos. El
+servidor que debe estar instalado y en ejecución es MySQL Server; no se necesita
+XAMPP.
 
-## Requisitos del sistema
+## Requisitos
 
-- Windows 10/11.
-- Java JDK 25 (LTS).
-- Node.js 18 o superior y npm.
-- Maven Wrapper incluido en el backend (`mvnw.cmd`).
-- XAMPP con Apache y MySQL/MariaDB.
-- Base de datos MariaDB/MySQL llamada `reservas_hoteleras`.
-- Navegador moderno: Chrome, Edge o Firefox.
-- Puertos disponibles:
-  - Frontend: `5171`.
-  - Backend: `39000`.
+- Windows 10 u 11.
+- JDK 25.
+- Node.js 18 o una versión posterior.
+- MySQL Server 8 y MySQL Workbench.
 
-## Instalación y configuración
+## Preparar la base de datos
 
-### 1. Base de datos
+1. Inicia el servicio de MySQL Server.
+2. Para una instalación nueva, abre MySQL Workbench y ejecuta
+   `database/reservas_hoteleras.sql`. El script crea la base
+   `reservas_hoteleras` y carga datos de ejemplo.
+3. La aplicación se conecta por defecto a `localhost:3306` con el usuario `root`.
+   Si usas otros datos de conexión, configúralos mediante variables de entorno.
 
-1. Inicia MySQL desde XAMPP.
-2. Crea la base de datos:
+Si la base ya tiene información, no vuelvas a ejecutar el script completo:
+podrías reemplazar o duplicar datos. Antes de hacer cambios, guarda una copia de
+seguridad. La migración
+`database/migrations/2026-10-01-add-service-stock.sql` es para bases antiguas
+que todavía no tienen el campo de inventario de servicios. Revísala y ejecútala
+una sola vez si corresponde. El stock inicial queda en cero y debe actualizarse
+con las cantidades reales.
 
-```sql
-CREATE DATABASE reservas_hoteleras;
-```
+## Configuración local
 
-3. Importa el esquema y los datos iniciales proporcionados para el proyecto.
-4. Verifica la conexión en:
-   `reservas-hoteleras/src/main/resources/application.properties`.
-
-La configuración de desarrollo espera:
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/reservas_hoteleras
-spring.datasource.username=root
-spring.datasource.password=
-```
-
-Si tu instalación usa otra contraseña, configura el valor localmente. No
-publiques contraseñas, claves JWT ni claves de Stripe en el repositorio.
-
-### 2. Backend
-
-Abre PowerShell en la carpeta del backend:
+En PowerShell, selecciona la instalación de Java que tengas. Cambia la ruta si
+tu JDK está en otra carpeta:
 
 ```powershell
-cd .\reservas-hoteleras
-.\mvnw.cmd clean install
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-25.0.2"
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+java -version
+```
+
+Configura la conexión a MySQL en la misma terminal. No guardes tu contraseña en
+el repositorio:
+
+```powershell
+$env:DB_USERNAME = "root"
+$env:DB_PASSWORD = "tu contraseña de MySQL"
+```
+
+Los pagos de prueba están desactivados inicialmente. Para probarlos en tu
+computadora, puedes activarlos así:
+
+```powershell
+$env:PAYMENTS_DEMO_MODE = "true"
+```
+
+Este modo es solo para desarrollo; no procesa cobros reales y no debe activarse
+en producción. No subas contraseñas, claves JWT ni claves de Stripe a GitHub.
+
+## Ejecutar el sistema
+
+Abre una terminal en la carpeta principal del repositorio y ejecuta el backend:
+
+```powershell
 .\mvnw.cmd spring-boot:run
 ```
 
-La API quedará disponible en:
+La API quedará disponible en `http://localhost:39000`. El proyecto valida que
+las tablas ya existan, así que prepara la base antes de iniciarlo.
 
-```text
-http://localhost:39000
-```
-
-El backend utiliza `spring.jpa.hibernate.ddl-auto=validate`, por lo que las
-tablas deben existir antes de iniciar la aplicación.
-
-### 3. Frontend
-
-En otra terminal:
+En otra terminal, instala y ejecuta el frontend:
 
 ```powershell
 cd .\frontend
-npm install
+npm ci
 npm run dev
 ```
 
-Abre:
+Abre `http://localhost:5171`. Las solicitudes a `/api` se envían al backend
+local.
 
-```text
-http://localhost:5171
-```
+## Perfiles de usuario
 
-El frontend usa el proxy de Vite para enviar las peticiones `/api` al backend
-en `http://localhost:39000`.
+- **Cliente:** consulta habitaciones, reserva, paga, solicita servicios y
+  registra reclamos.
+- **Recepcionista:** revisa reservas y registra el ingreso y salida de huéspedes.
+- **Gerente:** consulta información de operación y reportes.
+- **Administrador:** gestiona usuarios, habitaciones, servicios, promociones y
+  otras opciones del sistema.
 
-## Uso por rol
+## Comprobaciones
 
-### Cliente
-
-Puede consultar habitaciones, crear y revisar sus reservas, pagar, agregar
-servicios, descargar su comprobante, registrar reclamos y utilizar el chatbot
-web. El chatbot aparece únicamente cuando el usuario tiene rol `CLIENTE`.
-
-### Recepcionista
-
-Puede consultar reservas, confirmar solicitudes, registrar check-in y
-check-out, administrar operaciones de recepción y gestionar reclamos recibidos.
-
-### Gerente
-
-Puede supervisar reservas y recepción, consultar dashboards, revisar reportes,
-gestionar promociones y dar seguimiento a reclamos.
-
-### Administrador
-
-Tiene acceso completo a usuarios, roles, habitaciones, promociones, servicios,
-reservas, recepción, facturación, reclamos y reportes.
-
-## Reportes y facturación
-
-Desde el panel de administración se pueden descargar reportes de reservas en:
-
-- PDF con diseño corporativo y logo Casa Andina.
-- Excel con encabezados, filtros, bordes, filas alternadas y encabezado
-  congelado.
-- CSV compatible con Excel y codificación UTF-8.
-
-Desde **Mis reservas**, el botón **Facturar** permite seleccionar boleta o
-factura y descargar un PDF detallado. Para una factura se solicita RUC, razón
-social y dirección.
-
-## Chatbot y WhatsApp
-
-El chatbot integrado en la web está disponible únicamente para clientes
-autenticados. Sus respuestas son informativas y se basan en las funciones
-actuales del sistema.
-
-El botón **Hablar por WhatsApp** abre una conversación con el número del hotel
-usando un mensaje inicial prellenado. Esta modalidad no utiliza la API oficial
-de Meta ni automatiza mensajes entrantes; para eso sería necesario configurar
-WhatsApp Cloud API y sus credenciales.
-
-## Comandos de validación
-
-Frontend:
+Para construir el frontend:
 
 ```powershell
 cd .\frontend
+npm run lint
 npm run build
 ```
 
-Backend:
+Para ejecutar las pruebas del backend, desde la carpeta principal:
 
 ```powershell
-cd .\reservas-hoteleras
 .\mvnw.cmd test
 ```
 
-## Estrategia de ramificación
+## Organización del repositorio
 
-El repositorio utiliza Git Flow simplificado:
+```text
+reservas-hoteleras/
+├── database/       # Script inicial y migraciones de la base de datos
+├── frontend/       # Aplicación React
+├── src/            # API y pruebas con Spring Boot
+├── mvnw.cmd        # Maven Wrapper para Windows
+└── README.md
+```
 
-| Rama | Propósito |
-|---|---|
-| `master` | Código estable listo para producción |
-| `develop` | Integración de funcionalidades antes de publicar |
-| `feature/nombre-funcionalidad` | Desarrollo de una funcionalidad específica |
-| `hotfix/nombre-error` | Corrección urgente de errores en producción |
+## Ramas
 
-Las ramas `feature/` y `hotfix/` se crean solo cuando existe una tarea
-concreta. No se mantienen ramas vacías en el repositorio.
-
-## Flujo de trabajo
-
-1. Crear una rama `feature/` desde `develop`:
-
-   ```bash
-   git switch develop
-   git pull origin develop
-   git switch -c feature/mejora-reservas
-   ```
-
-2. Realizar cambios pequeños y commits descriptivos, por ejemplo:
-
-   ```text
-   feat: mejorar el estilo del módulo de reservas
-   ```
-
-3. Ejecutar el build del frontend y las pruebas del backend.
-4. Subir la rama al repositorio remoto:
-
-   ```bash
-   git push -u origin feature/mejora-reservas
-   ```
-
-5. Crear un Pull Request hacia `develop` y solicitar revisión de otro
-   integrante.
-6. Integrar el Pull Request en `develop` después de su aprobación.
-7. Al finalizar la iteración, crear un Pull Request de `develop` hacia
-   `master`.
-
-No incluir credenciales, tokens, contraseñas, datos reales de huéspedes ni
-claves de servicios externos en commits o Pull Requests.
+Se usan `develop` para integrar cambios y `master` para la versión estable. Las
+ramas de trabajo pueden llamarse, por ejemplo,
+`feature/mejora-reservas` o `hotfix/error-login`. Antes de integrar cambios,
+conviene ejecutar las pruebas y revisar que no se hayan incluido datos privados.
 
 ## Licencia
 
-No se ha definido una licencia open source para este proyecto. Antes de
-redistribuirlo, agrega un archivo `LICENSE` con la licencia elegida.
+El proyecto todavía no tiene una licencia open source definida.

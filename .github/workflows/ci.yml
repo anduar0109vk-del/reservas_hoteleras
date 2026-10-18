@@ -2,9 +2,8 @@ name: Validacion del proyecto
 
 on:
   push:
-    branches: [master, "feature/**", "docs/**"]
   pull_request:
-    branches: [master]
+    branches: [master, develop]
 
 jobs:
   backend:
@@ -17,7 +16,7 @@ jobs:
           java-version: "25"
           cache: maven
       - name: Compilar backend
-        run: bash ./mvnw -DskipTests package
+        run: bash ./mvnw verify
 
   frontend:
     runs-on: ubuntu-latest

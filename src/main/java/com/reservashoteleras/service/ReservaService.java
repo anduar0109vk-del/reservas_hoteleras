@@ -30,6 +30,7 @@ import com.reservashoteleras.repository.ServicioHabitacionRepository;
 import com.reservashoteleras.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -47,6 +48,7 @@ public class ReservaService {
     private final PromocionRepository promocionRepository;
     private final UsuarioRepository usuarioRepository;
     private final ServicioHabitacionRepository servicioHabitacionRepository;
+    private final ServicioHabitacionService servicioHabitacionService;
     private final ReservaServicioRepository reservaServicioRepository;
     private final PagoRepository pagoRepository;
     private final CheckInRepository checkInRepository;
@@ -127,6 +129,11 @@ public class ReservaService {
         return reservaRepository.findByClienteId(clienteId);
     }
 
+    public List<Reserva> getReservasByCliente(Long clienteId, Usuario usuario) {
+        validarAccesoCliente(clienteId, usuario);
+        return getReservasByCliente(clienteId);
+    }
+
     public List<Reserva> getReservasByEstado(EstadoReserva estado) {
         return reservaRepository.findByEstado(estado);
     }
@@ -134,6 +141,12 @@ public class ReservaService {
     public Reserva getReservaById(Long id) {
         return reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+    }
+
+    public Reserva getReservaById(Long id, Usuario usuario) {
+        Reserva reserva = getReservaById(id);
+        validarAccesoReserva(reserva, usuario);
+        return reserva;
     }
 
     // ==================== CREAR RESERVA ====================
@@ -144,7 +157,7 @@ public class ReservaService {
                 || !request.getFechaSalida().isAfter(request.getFechaEntrada())) {
             throw new RuntimeException("Las fechas de entrada y salida son obligatorias y válidas");
         }
-        if (request.getHabitacionId() == null || request.getClienteId() == null) {
+        if (request.getHabitacionId() == null) {
             throw new RuntimeException("El cliente y la habitación son obligatorios");
         }
         if (request.getMetodoPago() == null || request.getMetodoPago().isBlank()) {
@@ -161,10 +174,25 @@ public class ReservaService {
         
         Habitacion habitacion = habitacionRepository.findById(request.getHabitacionId())
                 .orElseThrow(() -> new RuntimeException("Habitación no encontrada"));
-        Cliente cliente = clienteRepository.findById(request.getClienteId())
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         Usuario creador = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        Cliente cliente;
+        if ("CLIENTE".equals(creador.getRol().getNombre())) {
+            cliente = clienteRepository.findByUsuarioId(usuarioId)
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        } else {
+            if (request.getClienteId() == null) {
+                throw new RuntimeException("El cliente y la habitación son obligatorios");
+            }
+            cliente = clienteRepository.findById(request.getClienteId())
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        }
+
+        Integer numeroHuespedes = request.getNumeroHuespedes();
+        if (numeroHuespedes == null || numeroHuespedes <= 0
+                || numeroHuespedes > habitacion.getTipoHabitacion().getCapacidad()) {
+            throw new RuntimeException("El número de huéspedes supera la capacidad de la habitación");
+        }
         
         long dias = java.time.temporal.ChronoUnit.DAYS.between(request.getFechaEntrada(), request.getFechaSalida());
         BigDecimal subtotalHabitacion = habitacion.getPrecioActual().multiply(BigDecimal.valueOf(dias));
@@ -247,7 +275,7 @@ public class ReservaService {
             Cliente cliente = clienteRepository.findByUsuarioId(usuario.getId())
                     .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
             if (!reserva.getCliente().getId().equals(cliente.getId())) {
-                throw new RuntimeException("No tienes permiso para cancelar esta reserva");
+                throw new AccessDeniedException("No tienes permiso para cancelar esta reserva");
             }
         }
         
@@ -289,17 +317,6 @@ public class ReservaService {
         }
         
         reserva.setEstado(EstadoReserva.CONFIRMADA);
-        
-        Habitacion habitacion = reserva.getHabitacion();
-        habitacion.setEstado(EstadoHabitacion.OCUPADA);
-        habitacionRepository.save(habitacion);
-        
-        Pago pago = pagoRepository.findByReservaId(id).orElse(null);
-        if (pago != null) {
-            pago.setEstado(EstadoPago.COMPLETADO);
-            pago.setFechaPago(LocalDateTime.now());
-            pagoRepository.save(pago);
-        }
         
         return reservaRepository.save(reserva);
     }
@@ -379,6 +396,7 @@ public class ReservaService {
     @Transactional
     public ReservaServicio agregarServicioAReserva(Long reservaId, Long servicioId, Integer cantidad, Usuario usuario) {
         Reserva reserva = getReservaById(reservaId);
+        validarAccesoReserva(reserva, usuario);
         
         if (reserva.getEstado() == EstadoReserva.CANCELADA || reserva.getEstado() == EstadoReserva.FINALIZADA) {
             throw new RuntimeException("No se pueden agregar servicios a una reserva cancelada o finalizada");
@@ -388,16 +406,11 @@ public class ReservaService {
             throw new RuntimeException("Solo se pueden agregar servicios a reservas pendientes o confirmadas");
         }
         
-        ServicioHabitacion servicio = servicioHabitacionRepository.findById(servicioId)
-                .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
-        
-        if (!servicio.getDisponible()) {
-            throw new RuntimeException("Servicio no disponible");
-        }
-        
         if (cantidad == null || cantidad <= 0) {
             throw new RuntimeException("La cantidad debe ser mayor a 0");
         }
+
+        ServicioHabitacion servicio = servicioHabitacionService.descontarStock(servicioId, cantidad);
         
         BigDecimal subtotal = servicio.getPrecio().multiply(BigDecimal.valueOf(cantidad));
         
@@ -425,6 +438,12 @@ public class ReservaService {
         return reservaServicioRepository.findByReservaId(reservaId);
     }
 
+    public List<ReservaServicio> getServiciosByReserva(Long reservaId, Usuario usuario) {
+        Reserva reserva = getReservaById(reservaId);
+        validarAccesoReserva(reserva, usuario);
+        return reservaServicioRepository.findByReservaId(reservaId);
+    }
+
     public List<ReservaServicio> getServiciosByReservaAndEstado(Long reservaId, EstadoServicio estado) {
         getReservaById(reservaId);
         return reservaServicioRepository.findByReservaIdAndEstado(reservaId, estado);
@@ -436,6 +455,7 @@ public class ReservaService {
                 .orElseThrow(() -> new RuntimeException("Servicio de reserva no encontrado"));
         
         Reserva reserva = reservaServicio.getReserva();
+        validarAccesoReserva(reserva, usuario);
         
         if (reserva.getEstado() == EstadoReserva.CANCELADA || reserva.getEstado() == EstadoReserva.FINALIZADA) {
             throw new RuntimeException("No se pueden eliminar servicios de una reserva cancelada o finalizada");
@@ -445,10 +465,14 @@ public class ReservaService {
             throw new RuntimeException("No se puede eliminar un servicio que ya ha sido entregado");
         }
         
-        BigDecimal subtotal = reservaServicio.getSubtotal();
-        reserva.setMontoTotal(reserva.getMontoTotal().subtract(subtotal));
-        reserva.setSubtotalServicios(reserva.getSubtotalServicios().subtract(subtotal));
-        reservaRepository.save(reserva);
+        if (reservaServicio.getEstado() != EstadoServicio.CANCELADO) {
+            BigDecimal subtotal = reservaServicio.getSubtotal();
+            reserva.setMontoTotal(reserva.getMontoTotal().subtract(subtotal));
+            reserva.setSubtotalServicios(reserva.getSubtotalServicios().subtract(subtotal));
+            reservaRepository.save(reserva);
+            servicioHabitacionService.reponerStock(
+                    reservaServicio.getServicio().getId(), reservaServicio.getCantidad());
+        }
         
         reservaServicioRepository.delete(reservaServicio);
     }
@@ -473,18 +497,21 @@ public class ReservaService {
             throw new RuntimeException("Un servicio cancelado no puede cambiar de estado");
         }
         
+        EstadoServicio estadoAnterior = reservaServicio.getEstado();
         reservaServicio.setEstado(estado);
         
         if (estado == EstadoServicio.ENTREGADO) {
             reservaServicio.setFechaEntrega(LocalDateTime.now());
         }
         
-        if (estado == EstadoServicio.CANCELADO) {
+        if (estado == EstadoServicio.CANCELADO && estadoAnterior != EstadoServicio.CANCELADO) {
             Reserva reserva = reservaServicio.getReserva();
             BigDecimal subtotal = reservaServicio.getSubtotal();
             reserva.setMontoTotal(reserva.getMontoTotal().subtract(subtotal));
             reserva.setSubtotalServicios(reserva.getSubtotalServicios().subtract(subtotal));
             reservaRepository.save(reserva);
+            servicioHabitacionService.reponerStock(
+                    reservaServicio.getServicio().getId(), reservaServicio.getCantidad());
         }
         
         return reservaServicioRepository.save(reservaServicio);
@@ -501,5 +528,25 @@ public class ReservaService {
                 .filter(rs -> rs.getEstado() != EstadoServicio.CANCELADO)
                 .map(ReservaServicio::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private void validarAccesoCliente(Long clienteId, Usuario usuario) {
+        if ("CLIENTE".equals(usuario.getRol().getNombre())) {
+            Cliente cliente = clienteRepository.findByUsuarioId(usuario.getId())
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+            if (!cliente.getId().equals(clienteId)) {
+                throw new AccessDeniedException("No tienes permiso para consultar estas reservas");
+            }
+        }
+    }
+
+    private void validarAccesoReserva(Reserva reserva, Usuario usuario) {
+        if ("CLIENTE".equals(usuario.getRol().getNombre())) {
+            Cliente cliente = clienteRepository.findByUsuarioId(usuario.getId())
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+            if (!reserva.getCliente().getId().equals(cliente.getId())) {
+                throw new AccessDeniedException("No tienes permiso para consultar esta reserva");
+            }
+        }
     }
 }

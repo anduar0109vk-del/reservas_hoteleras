@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Navbar from './Navbar';
 
 const TodasReservas = () => {
-  const { user } = useAuth();
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -62,7 +60,7 @@ const TodasReservas = () => {
       await api.patch(`/recepcion/reservas/${id}/cancelar?motivo=Cancelado%20por%20recepcionista`);
       await cargarReservas();
       alert('✅ Reserva cancelada exitosamente');
-    } catch (error) {
+    } catch {
       alert('❌ Error al cancelar la reserva');
     }
   };
@@ -72,7 +70,7 @@ const TodasReservas = () => {
       await api.patch(`/recepcion/reservas/${id}/confirmar`);
       await cargarReservas();
       alert('✅ Reserva confirmada exitosamente');
-    } catch (error) {
+    } catch {
       alert('❌ Error al confirmar la reserva');
     }
   };
@@ -84,7 +82,7 @@ const TodasReservas = () => {
       await api.patch(`/recepcion/reservas/${id}/finalizar`);
       await cargarReservas();
       alert('✅ Checkout realizado exitosamente');
-    } catch (error) {
+    } catch {
       alert('❌ Error al finalizar la reserva');
     }
   };

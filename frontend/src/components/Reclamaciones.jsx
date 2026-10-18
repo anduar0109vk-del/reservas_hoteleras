@@ -35,13 +35,13 @@ export default function Reclamaciones() {
     await api.patch(`/reclamos/${item.id}/estado`, { estado, respuesta });
     cargar();
   };
-  return <><Navbar /><main style={styles.page}>
-    <header style={styles.hero}>
+  return <><Navbar /><main className="claims-page" style={styles.page}>
+    <header className="claims-hero" style={styles.hero}>
       <div style={styles.heroIcon}>📖</div>
-      <div><h1 style={styles.title}>Libro de reclamaciones</h1>
+      <div className="claims-hero-copy"><h1 style={styles.title}>Libro de reclamaciones</h1>
       <p style={styles.subtitle}>Tu opinión nos ayuda a mejorar. Registra y consulta el estado de tus solicitudes.</p></div>
     </header>
-    {message && <p role="status" style={styles.message}>{message}</p>}
+    {message && <p className="claims-message" role="status" style={styles.message}>{message}</p>}
     <form className="card reclamos-form" onSubmit={enviar} style={styles.form}>
       <h2 style={styles.sectionTitle}>Registrar una solicitud</h2>
       <p style={styles.help}>Completa los datos con información clara y verificable.</p>
@@ -52,11 +52,11 @@ export default function Reclamaciones() {
       <label>Correo electrónico <input name="email" type="email" required value={form.email} onChange={change} /></label>
       <label>Teléfono <input name="telefono" value={form.telefono} onChange={change} /></label>
       <label>Tipo <select name="tipo" value={form.tipo} onChange={change}><option>RECLAMO</option><option>QUEJA</option></select></label>
-      <label>Detalle <textarea name="detalle" required minLength="10" rows="4" value={form.detalle} onChange={change} /></label>
-      <label>Pedido del cliente <textarea name="pedidoCliente" rows="3" value={form.pedidoCliente} onChange={change} /></label>
+      <label className="claims-field-wide">Detalle <textarea name="detalle" required minLength="10" rows="4" value={form.detalle} onChange={change} /></label>
+      <label className="claims-field-wide">Pedido del cliente <textarea name="pedidoCliente" rows="3" value={form.pedidoCliente} onChange={change} /></label>
       <button className="btn-primary" type="submit">Registrar en el libro</button>
     </form>
-    <section className="card" style={styles.listCard}>
+    <section className="card claims-list" style={styles.listCard}>
       <h2 style={styles.sectionTitle}>{personal ? 'Reclamos recibidos' : 'Mis reclamos'}</h2>
     {items.length === 0 ? <p style={styles.empty}>Aún no hay reclamos registrados.</p> : <div style={{ overflowX: 'auto' }}><table className="claims-table"><thead><tr><th>Número</th><th>Fecha</th><th>Tipo</th><th>Estado</th><th>Detalle</th>{personal && <th>Actualizar</th>}</tr></thead>
       <tbody>{items.map((item) => <tr key={item.id}><td>{item.numeroReclamo}</td><td>{item.fechaRegistro?.slice(0, 10)}</td><td>{item.tipo}</td><td>{item.estado}</td><td>{item.detalle}</td>
@@ -67,13 +67,13 @@ export default function Reclamaciones() {
 }
 
 const styles = {
-  page: { maxWidth: 1100, margin: '0 auto', padding: '32px 20px' },
+  page: { maxWidth: 1100, width: '100%', minWidth: 0, margin: '0 auto', padding: '32px 20px' },
   hero: { display: 'flex', gap: 16, alignItems: 'center', padding: 24, marginBottom: 20, borderRadius: 14, background: 'linear-gradient(135deg, #1a365d, #2b6cb0)', color: 'white', boxShadow: '0 8px 20px rgba(26,54,93,.2)' },
   heroIcon: { fontSize: 42 },
   title: { color: 'white', margin: '0 0 6px' },
   subtitle: { color: '#dbeafe', margin: 0 },
   message: { padding: 14, borderRadius: 8, background: '#e6fffa', color: '#276749', marginBottom: 18 },
-  form: { display: 'grid', gap: 10, maxWidth: 720, margin: '0 auto 24px', padding: 24 },
+  form: { display: 'grid', gap: 10, width: '100%', margin: '0 0 24px', padding: 24 },
   sectionTitle: { margin: '0 0 4px', color: '#1a365d' },
   help: { color: '#718096', marginBottom: 8 },
   listCard: { padding: 24, overflow: 'hidden' },

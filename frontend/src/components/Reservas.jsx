@@ -72,7 +72,7 @@ const Reservas = () => {
       await api.patch(`/reservas/${id}/cancelar?motivo=Cancelado%20por%20usuario`);
       await cargarReservas();
       alert('✅ Reserva cancelada exitosamente');
-    } catch (error) {
+    } catch {
       alert('❌ Error al cancelar la reserva');
     }
   };
@@ -82,7 +82,7 @@ const Reservas = () => {
       await api.patch(`/reservas/${id}/confirmar`);
       await cargarReservas();
       alert('✅ Reserva confirmada exitosamente');
-    } catch (error) {
+    } catch {
       alert('❌ Error al confirmar la reserva');
     }
   };
@@ -94,7 +94,7 @@ const Reservas = () => {
       await api.patch(`/reservas/${id}/finalizar`);
       await cargarReservas();
       alert('✅ Checkout realizado exitosamente');
-    } catch (error) {
+    } catch {
       alert('❌ Error al finalizar la reserva');
     }
   };

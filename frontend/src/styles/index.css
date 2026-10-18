@@ -4,11 +4,30 @@
   box-sizing: border-box;
 }
 
+:root,
+html[data-theme='light'] {
+  color-scheme: light;
+  --app-background: #f0f4f8;
+  --app-foreground: #2d3748;
+  --surface-background: #ffffff;
+  --surface-foreground: #2d3748;
+  --muted-foreground: #4a5568;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --app-background: #172033;
+  --app-foreground: #e2e8f0;
+  --surface-background: #202c40;
+  --surface-foreground: #e2e8f0;
+  --muted-foreground: #cbd5e0;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f4f8;
-  color: #2d3748;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  background-color: var(--app-background);
+  color: var(--app-foreground);
+  transition: none;
 }
 
 button {
@@ -68,20 +87,11 @@ input:focus, select:focus, textarea:focus {
 }
 
 .card {
-  background: white;
+  background: var(--surface-background);
+  color: var(--surface-foreground);
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-html[data-theme='dark'] body {
-  background-color: #172033;
-  color: #e2e8f0;
-}
-
-html[data-theme='dark'] .card {
-  background: #202c40;
-  color: #e2e8f0;
 }
 
 html[data-theme='dark'] input,
@@ -96,23 +106,36 @@ html[data-theme='dark'] .loading-spinner {
   color: #e2e8f0;
 }
 
-html[data-theme='dark'] [style*='background-color: white'],
-html[data-theme='dark'] [style*='background: white'] {
-  color: #2d3748 !important;
-}
-
 .reclamos-form label {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: 6px;
   color: #2d3748;
   font-weight: 600;
   font-size: 14px;
 }
 
+.reclamos-form {
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+.reclamos-form > h2,
+.reclamos-form > p,
+.reclamos-form > button,
+.reclamos-form .claims-field-wide {
+  grid-column: 1 / -1;
+}
+
 .reclamos-form input,
 .reclamos-form select,
 .reclamos-form textarea {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  resize: none;
   padding: 10px 12px;
   border: 1px solid #cbd5e0;
   border-radius: 7px;
@@ -141,6 +164,26 @@ html[data-theme='dark'] [style*='background: white'] {
   border-bottom: 1px solid #e2e8f0;
   text-align: left;
   vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.claims-table {
+  min-width: 680px;
+}
+
+.claims-hero-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.claims-hero,
+.claims-message {
+  grid-column: 1 / -1;
+}
+
+.claims-list {
+  min-width: 0;
+  margin-bottom: 24px;
 }
 
 .claims-table th:last-child,
@@ -211,6 +254,44 @@ html[data-theme='dark'] .report-table tbody tr:nth-child(even),
 html[data-theme='dark'] .claims-table tbody tr:hover,
 html[data-theme='dark'] .report-table tbody tr:hover {
   background: #202c40;
+}
+
+@media (min-width: 1200px) {
+  .claims-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
+    column-gap: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .claims-page {
+    padding: 20px 12px !important;
+  }
+
+  .claims-hero {
+    gap: 12px !important;
+    padding: 18px !important;
+  }
+
+  .reclamos-form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .reclamos-form > h2,
+  .reclamos-form > p,
+  .reclamos-form > button,
+  .reclamos-form .claims-field-wide {
+    grid-column: 1;
+  }
+
+  .claims-table th,
+  .claims-table td {
+    padding: 10px 8px;
+  }
 }
 
 .grid-3 {
@@ -356,6 +437,44 @@ html[data-theme='dark'] .report-table tbody tr:hover {
 .chatbot-whatsapp:hover { opacity: 1; background: #1faa53; }
 
 html[data-theme='dark'] .chatbot-panel { border-color: #40516a; background: #202c40; }
+
+.login-brand {
+  width: 156px;
+  margin: 0 auto 18px;
+  padding: 6px;
+  border-radius: 8px;
+  background: #142b45;
+}
+
+.login-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+html[data-theme='dark'] .login-screen {
+  background-color: #172033 !important;
+}
+
+html[data-theme='dark'] .login-screen .login-card {
+  background-color: #202c40 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme='dark'] .login-screen .login-card h2,
+html[data-theme='dark'] .login-screen .login-card p,
+html[data-theme='dark'] .login-screen .login-card label {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme='dark'] .login-screen .login-credentials {
+  background-color: #263449 !important;
+}
+
+html[data-theme='dark'] .login-screen .login-credentials p,
+html[data-theme='dark'] .login-screen .login-credentials strong {
+  color: #f7fafc !important;
+}
 html[data-theme='dark'] .chatbot-messages { background: #172033; }
 html[data-theme='dark'] .chatbot-message { color: #e2e8f0; }
 html[data-theme='dark'] .chatbot-message-bot { background: #263449; }
@@ -365,4 +484,235 @@ html[data-theme='dark'] .chatbot-quick-actions button { border-color: #4a5568; b
   .client-chatbot { right: 16px; bottom: 16px; }
   .chatbot-launcher b { display: none; }
   .chatbot-launcher { width: 52px; height: 52px; justify-content: center; padding: 0; }
+}
+
+.hotel-navbar {
+  padding: 18px 0 20px;
+  color: #fff;
+  background: linear-gradient(135deg, #17365d, #214570);
+  box-shadow: 0 4px 16px rgba(15, 35, 60, 0.22);
+}
+
+.hotel-navbar__inner {
+  width: calc(100% - 32px);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hotel-navbar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(219, 234, 254, 0.2);
+}
+
+.hotel-navbar__brand {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  border-radius: 8px;
+}
+
+.hotel-navbar__brand img {
+  display: block;
+  width: 140px;
+  height: 52px;
+  object-fit: contain;
+}
+
+.hotel-navbar__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hotel-navbar__user,
+.hotel-navbar__theme,
+.hotel-navbar__logout {
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid rgba(219, 234, 254, 0.35);
+  border-radius: 9px;
+  color: #fff !important;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.hotel-navbar__user {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(12, 31, 54, 0.28);
+}
+
+.hotel-navbar__theme {
+  background: #2c5282;
+}
+
+.hotel-navbar__logout {
+  border-color: #e53e3e;
+  background: #c53030;
+}
+
+.hotel-navbar__theme:hover,
+.hotel-navbar__logout:hover {
+  filter: brightness(1.08);
+}
+
+.hotel-nav-section {
+  margin-top: 16px;
+}
+
+.hotel-nav-section__title {
+  margin: 0 0 9px;
+  color: #dbeafe;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.hotel-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.hotel-nav-card {
+  display: flex;
+  min-width: 0;
+  min-height: 56px;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 13px;
+  border: 1px solid rgba(219, 234, 254, 0.2);
+  border-radius: 10px;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.hotel-nav-card:hover {
+  border-color: rgba(219, 234, 254, 0.65);
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.hotel-nav-card:focus-visible,
+.hotel-navbar__theme:focus-visible,
+.hotel-navbar__logout:focus-visible {
+  outline: 3px solid #90cdf4;
+  outline-offset: 2px;
+}
+
+.hotel-nav-card.is-active {
+  border-color: #fff;
+  color: #17324f !important;
+  background: #f1f6fc;
+  box-shadow: 0 2px 8px rgba(9, 30, 55, 0.16);
+}
+
+.hotel-nav-card__icon {
+  flex: 0 0 24px;
+  font-size: 19px;
+  line-height: 1;
+  text-align: center;
+}
+
+.hotel-nav-card__label {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+html[data-theme='dark'] .hotel-navbar .hotel-nav-card.is-active {
+  color: #17324f !important;
+}
+
+@media (max-width: 640px) {
+  .hotel-navbar__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hotel-navbar__brand {
+    align-self: center;
+  }
+
+  .hotel-navbar__actions {
+    justify-content: center;
+  }
+
+  .hotel-nav-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .hotel-nav-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+html[data-theme='dark'] body :is(h1, h2, h3, h4, h5, h6, p, a, label, span, td, th, li, small, strong, em, dt, dd, caption, legend, time, code) {
+  color: var(--app-foreground) !important;
+}
+
+html[data-theme='dark'] body,
+html[data-theme='dark'] #root {
+  background-color: var(--app-background) !important;
+  color: var(--app-foreground) !important;
+  transition: none;
+}
+
+html[data-theme='light'] body :is([style*='color: rgb(113, 128, 150)']) {
+  color: #667085 !important;
+}
+
+html[data-theme='dark'] body :is([style*='color: rgb(45, 55, 72)'], [style*='color: rgb(74, 85, 104)'], [style*='color: rgb(113, 128, 150)'], [style*='color: rgb(43, 108, 176)'], [style*='color: rgb(26, 54, 93)']) {
+  color: var(--app-foreground) !important;
+}
+
+html[data-theme='dark'] body :is([style*='background-color: white'], [style*='background: white'], [style*='background-color: rgb(255, 255, 255)'], [style*='background: rgb(255, 255, 255)'], [style*='background-color: rgb(247, 250, 252)'], [style*='background: rgb(247, 250, 252)'], [style*='background-color: rgb(248, 250, 252)'], [style*='background: rgb(248, 250, 252)'], [style*='background-color: rgb(237, 242, 247)'], [style*='background: rgb(237, 242, 247)']) {
+  background-color: var(--surface-background) !important;
+  color: var(--surface-foreground) !important;
+}
+
+html[data-theme='dark'] .error-message,
+html[data-theme='dark'] .error-message * {
+  color: #feb2b2 !important;
+}
+
+html[data-theme='dark'] .success-message,
+html[data-theme='dark'] .success-message * {
+  color: #9ae6b4 !important;
+}
+
+html[data-theme='dark'] .hotel-navbar :is(h1, h2, h3, h4, p, a, label, span, small, strong) {
+  color: #f7fafc !important;
+}
+
+html[data-theme='dark'] .hotel-navbar .hotel-nav-card.is-active,
+html[data-theme='dark'] .hotel-navbar .hotel-nav-card.is-active :is(span, small, strong) {
+  color: #17324f !important;
+}
+
+html[data-theme='dark'] .btn-primary,
+html[data-theme='dark'] .btn-danger,
+html[data-theme='dark'] .btn-success,
+html[data-theme='dark'] .hotel-navbar button {
+  color: #ffffff !important;
+}
+
+html[data-theme='dark'] input::placeholder,
+html[data-theme='dark'] textarea::placeholder {
+  color: #a0aec0;
+  opacity: 1;
 }

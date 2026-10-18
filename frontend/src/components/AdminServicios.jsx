@@ -12,8 +12,10 @@ const AdminServicios = () => {
     categoria: 'COMIDA',
     descripcion: '',
     precio: '',
+    stock: '0',
     urlImagen: ''
   });
+  const [stockInputs, setStockInputs] = useState({});
 
   useEffect(() => {
     cargarServicios();
@@ -23,6 +25,9 @@ const AdminServicios = () => {
     try {
       const response = await api.get('/admin/servicios');
       setServicios(response.data);
+      setStockInputs(Object.fromEntries(
+        response.data.map(servicio => [servicio.id, String(servicio.stock ?? 0)])
+      ));
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -37,13 +42,33 @@ const AdminServicios = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/admin/servicios', formData);
+      await api.post('/admin/servicios', {
+        ...formData,
+        precio: Number(formData.precio),
+        stock: Number(formData.stock)
+      });
       alert('✅ Servicio creado exitosamente');
       setShowForm(false);
-      setFormData({ nombre: '', categoria: 'COMIDA', descripcion: '', precio: '', urlImagen: '' });
+      setFormData({ nombre: '', categoria: 'COMIDA', descripcion: '', precio: '', stock: '0', urlImagen: '' });
       cargarServicios();
-    } catch (error) {
+    } catch {
       alert('❌ Error al crear servicio');
+    }
+  };
+
+  const guardarStock = async (servicio) => {
+    const stock = Number(stockInputs[servicio.id]);
+    if (!Number.isInteger(stock) || stock < 0) {
+      alert('El stock debe ser un número entero igual o mayor a cero');
+      return;
+    }
+
+    try {
+      const response = await api.patch(`/admin/servicios/${servicio.id}/stock`, { stock });
+      setServicios(current => current.map(item => item.id === servicio.id ? response.data : item));
+      setStockInputs(current => ({ ...current, [servicio.id]: String(response.data.stock) }));
+    } catch (error) {
+      alert(error.response?.data?.message || '❌ Error al actualizar el stock');
     }
   };
 
@@ -51,7 +76,7 @@ const AdminServicios = () => {
     try {
       await api.patch(`/admin/servicios/${id}/toggle`, { disponible: !disponible });
       cargarServicios();
-    } catch (error) {
+    } catch {
       alert('❌ Error al cambiar disponibilidad');
     }
   };
@@ -62,7 +87,7 @@ const AdminServicios = () => {
       await api.delete(`/admin/servicios/${id}`);
       alert('✅ Servicio eliminado');
       cargarServicios();
-    } catch (error) {
+    } catch {
       alert('❌ Error al eliminar');
     }
   };
@@ -116,12 +141,16 @@ const AdminServicios = () => {
               <div style={styles.row}>
                 <div style={styles.field}>
                   <label>Precio (S/) *</label>
-                  <input type="number" step="0.01" name="precio" value={formData.precio} onChange={handleChange} required />
+                  <input type="number" min="0.01" step="0.01" name="precio" value={formData.precio} onChange={handleChange} required />
                 </div>
                 <div style={styles.field}>
-                  <label>URL Imagen</label>
-                  <input name="urlImagen" value={formData.urlImagen} onChange={handleChange} placeholder="https://ejemplo.com/imagen.jpg" />
+                  <label>Stock inicial *</label>
+                  <input type="number" min="0" step="1" name="stock" value={formData.stock} onChange={handleChange} required />
                 </div>
+              </div>
+              <div style={styles.field}>
+                <label>URL Imagen</label>
+                <input name="urlImagen" value={formData.urlImagen} onChange={handleChange} placeholder="https://ejemplo.com/imagen.jpg" />
               </div>
               <div style={styles.buttonRow}>
                 <button type="button" className="btn-danger" onClick={() => setShowForm(false)}>Cancelar</button>
@@ -136,13 +165,38 @@ const AdminServicios = () => {
             <div key={s.id} className="card" style={styles.servicioCard}>
               <div style={styles.cardHeader}>
                 <h4>{getCategoriaEmoji(s.categoria)} {s.nombre}</h4>
-                <span style={{ ...styles.disponibleBadge, backgroundColor: s.disponible ? '#48bb78' : '#fc8181' }}>
-                  {s.disponible ? '✅ Disponible' : '❌ No disponible'}
+                <span style={{
+                  ...styles.disponibleBadge,
+                  backgroundColor: s.disponible && (s.stock ?? 0) > 0 ? '#48bb78' : '#fc8181'
+                }}>
+                  {!s.disponible ? '❌ No disponible' : (s.stock ?? 0) > 0 ? '✅ Disponible' : '📦 Agotado'}
                 </span>
               </div>
               <p><strong>Categoría:</strong> {s.categoria}</p>
               <p><strong>Descripción:</strong> {s.descripcion || 'N/A'}</p>
               <p><strong>Precio:</strong> S/{s.precio}</p>
+              <p><strong>Stock disponible:</strong> {s.stock ?? 0}</p>
+              <div style={styles.stockControls}>
+                <label htmlFor={`stock-${s.id}`}>Actualizar stock</label>
+                <input
+                  id={`stock-${s.id}`}
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={stockInputs[s.id] ?? String(s.stock ?? 0)}
+                  onChange={(event) => setStockInputs(current => ({
+                    ...current,
+                    [s.id]: event.target.value
+                  }))}
+                />
+                <button
+                  className="btn-primary"
+                  onClick={() => guardarStock(s)}
+                  disabled={Number(stockInputs[s.id] ?? s.stock ?? 0) === (s.stock ?? 0)}
+                >
+                  Guardar stock
+                </button>
+              </div>
               {s.urlImagen && <img src={s.urlImagen} alt={s.nombre} style={styles.imagen} />}
               <div style={styles.buttonContainer}>
                 <button className="btn-primary" onClick={() => toggleDisponibilidad(s.id, s.disponible)}>
@@ -192,6 +246,13 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
+  },
+  stockControls: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 90px auto',
+    alignItems: 'center',
+    gap: '8px',
+    marginTop: '12px',
   },
   buttonRow: {
     display: 'flex',

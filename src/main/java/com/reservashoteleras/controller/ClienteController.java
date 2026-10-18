@@ -3,10 +3,13 @@ package com.reservashoteleras.controller;
 import com.reservashoteleras.entity.Cliente;
 import com.reservashoteleras.repository.ClienteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/clientes")
@@ -15,9 +18,14 @@ import java.util.List;
 public class ClienteController {
     private final ClienteRepository clienteRepository;
 
-    // ✅ Endpoint público para obtener cliente por email (CLIENTE)
     @GetMapping("/usuario/{email}")
-    public ResponseEntity<Cliente> getClienteByEmail(@PathVariable String email) {
+    public ResponseEntity<Cliente> getClienteByEmail(@PathVariable String email, Authentication authentication) {
+        boolean esPersonal = authentication.getAuthorities().stream()
+                .anyMatch(authority -> Set.of("ROLE_ADMIN", "ROLE_GERENTE", "ROLE_RECEPCIONISTA")
+                        .contains(authority.getAuthority()));
+        if (!esPersonal && !authentication.getName().equalsIgnoreCase(email)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Cliente cliente = clienteRepository.findByUsuarioEmail(email)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         return ResponseEntity.ok(cliente);

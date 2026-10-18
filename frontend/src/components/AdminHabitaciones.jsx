@@ -51,7 +51,7 @@ const AdminHabitaciones = () => {
       setShowForm(false);
       setFormData({ numero: '', piso: '', tipoHabitacionId: '', precioActual: '', destacada: false });
       cargarDatos();
-    } catch (error) {
+    } catch {
       alert('❌ Error al crear habitación');
     }
   };
@@ -62,7 +62,7 @@ const AdminHabitaciones = () => {
       await api.delete(`/admin/habitaciones/${id}`);
       alert('✅ Habitación eliminada');
       cargarDatos();
-    } catch (error) {
+    } catch {
       alert('❌ Error al eliminar');
     }
   };
@@ -71,7 +71,7 @@ const AdminHabitaciones = () => {
     try {
       await api.patch(`/admin/habitaciones/${id}/estado?estado=${estado}`);
       cargarDatos();
-    } catch (error) {
+    } catch {
       alert('❌ Error al cambiar estado');
     }
   };

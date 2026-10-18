@@ -29,13 +29,13 @@ public class ReservaController {
     }
     
     @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<List<Reserva>> getByCliente(@PathVariable Long clienteId) {
-        return ResponseEntity.ok(reservaService.getReservasByCliente(clienteId));
+    public ResponseEntity<List<Reserva>> getByCliente(@PathVariable Long clienteId, Authentication auth) {
+        return ResponseEntity.ok(reservaService.getReservasByCliente(clienteId, obtenerUsuario(auth)));
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Reserva> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(reservaService.getReservaById(id));
+    public ResponseEntity<Reserva> getById(@PathVariable Long id, Authentication auth) {
+        return ResponseEntity.ok(reservaService.getReservaById(id, obtenerUsuario(auth)));
     }
     
     @PostMapping
@@ -77,8 +77,9 @@ public class ReservaController {
     }
 
     @GetMapping("/{reservaId}/servicios")
-    public ResponseEntity<List<ReservaServicio>> getServiciosByReserva(@PathVariable Long reservaId) {
-        return ResponseEntity.ok(reservaService.getServiciosByReserva(reservaId));
+    public ResponseEntity<List<ReservaServicio>> getServiciosByReserva(
+            @PathVariable Long reservaId, Authentication auth) {
+        return ResponseEntity.ok(reservaService.getServiciosByReserva(reservaId, obtenerUsuario(auth)));
     }
 
     @PatchMapping("/servicios/{reservaServicioId}/estado")

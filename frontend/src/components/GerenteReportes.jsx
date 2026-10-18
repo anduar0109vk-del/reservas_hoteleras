@@ -1,11 +1,9 @@
 // src/components/GerenteReportes.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Navbar from './Navbar';
 
 const GerenteReportes = () => {
-  const navigate = useNavigate();
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [estadisticas, setEstadisticas] = useState({

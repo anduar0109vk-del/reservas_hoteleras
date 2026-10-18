@@ -6,6 +6,7 @@ import com.reservashoteleras.service.HabitacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
@@ -50,11 +51,13 @@ public class HabitacionController {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Habitacion> crear(@RequestBody HabitacionRequest request) {
         return ResponseEntity.ok(habitacionService.crearHabitacion(request));
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Habitacion> actualizar(@PathVariable Integer id, @RequestBody HabitacionRequest request) {
         return ResponseEntity.ok(habitacionService.actualizarHabitacion(id, request));
     }

@@ -40,7 +40,8 @@ public class ServicioController {
             servicio.getCategoria(),
             servicio.getDescripcion(),
             servicio.getPrecio(),
-            servicio.getUrlImagen()
+            servicio.getUrlImagen(),
+            servicio.getStock()
         ));
     }
 
@@ -53,8 +54,16 @@ public class ServicioController {
             servicio.getCategoria(),
             servicio.getDescripcion(),
             servicio.getPrecio(),
-            servicio.getUrlImagen()
+            servicio.getUrlImagen(),
+            servicio.getStock()
         ));
+    }
+
+    @PatchMapping("/{id}/stock")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ServicioHabitacion> actualizarStock(
+            @PathVariable Long id, @RequestBody Map<String, Integer> request) {
+        return ResponseEntity.ok(servicioService.actualizarStock(id, request.get("stock")));
     }
 
     @PatchMapping("/{id}/toggle")
@@ -82,8 +91,10 @@ public class ServicioController {
     }
 
     @GetMapping("/reserva/{reservaId}")
-    public ResponseEntity<List<ReservaServicio>> getServiciosByReserva(@PathVariable Long reservaId) {
-        return ResponseEntity.ok(reservaService.getServiciosByReserva(reservaId));
+    public ResponseEntity<List<ReservaServicio>> getServiciosByReserva(
+            @PathVariable Long reservaId, Authentication auth) {
+        Usuario usuario = (Usuario) auth.getPrincipal();
+        return ResponseEntity.ok(reservaService.getServiciosByReserva(reservaId, usuario));
     }
 
     @PatchMapping("/reserva/{reservaServicioId}/estado")

@@ -12,9 +12,10 @@ import java.util.List;
 public interface HabitacionRepository extends JpaRepository<Habitacion, Integer> {
     List<Habitacion> findByEstado(EstadoHabitacion estado);
     
-    @Query("SELECT h FROM Habitacion h WHERE h.estado = 'DISPONIBLE' AND h.id NOT IN " +
+    @Query("SELECT h FROM Habitacion h WHERE h.estado NOT IN ('MANTENIMIENTO', 'LIMPIEZA') " +
+           "AND (h.estado <> 'OCUPADA' OR ?1 > CURRENT_DATE) AND h.id NOT IN " +
            "(SELECT r.habitacion.id FROM Reserva r WHERE r.estado IN ('PENDIENTE', 'CONFIRMADA') " +
-           "AND (r.fechaEntrada <= ?2 AND r.fechaSalida >= ?1))")
+           "AND (r.fechaEntrada < ?2 AND r.fechaSalida > ?1))")
     List<Habitacion> findDisponiblesEntreFechas(LocalDate fechaEntrada, LocalDate fechaSalida);
     
     @Query("SELECT h FROM Habitacion h ORDER BY h.vecesReservada DESC")

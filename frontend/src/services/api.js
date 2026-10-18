@@ -20,7 +20,7 @@ const api = axios.create({
     if (typeof data === 'string') {
       try {
         data = JSON.parse(data);
-      } catch (error) {
+      } catch {
         return data;
       }
     }
@@ -42,10 +42,12 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

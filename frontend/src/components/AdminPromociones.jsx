@@ -44,7 +44,7 @@ const AdminPromociones = () => {
       setShowForm(false);
       setFormData({ codigo: '', nombre: '', descripcion: '', tipoDescuento: 'PORCENTAJE', valor: '', fechaInicio: '', fechaFin: '' });
       cargarPromociones();
-    } catch (error) {
+    } catch {
       alert('❌ Error al crear promoción');
     }
   };
@@ -53,7 +53,7 @@ const AdminPromociones = () => {
     try {
       await api.patch(`/admin/promociones/${id}/toggle`, { activo: !activo });
       cargarPromociones();
-    } catch (error) {
+    } catch {
       alert('❌ Error al cambiar estado');
     }
   };
@@ -64,7 +64,7 @@ const AdminPromociones = () => {
       await api.delete(`/admin/promociones/${id}`);
       alert('✅ Promoción eliminada');
       cargarPromociones();
-    } catch (error) {
+    } catch {
       alert('❌ Error al eliminar');
     }
   };

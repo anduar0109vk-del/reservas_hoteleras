@@ -2,6 +2,7 @@ package com.reservashoteleras.config;
 
 import com.reservashoteleras.security.CustomUserDetailsService;
 import com.reservashoteleras.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,12 +13,15 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 @Configuration
 @EnableMethodSecurity
@@ -32,10 +36,12 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(
+                    (request, response, exception) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED)))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/habitaciones/disponibles", 
                                 "/api/habitaciones/mas-pedidas", "/api/habitaciones/destacadas",
-                                "/api/servicios/disponibles", "/api/clientes/usuario/**").permitAll()
+                                "/api/servicios/disponibles").permitAll()
                 .requestMatchers("/api/bot/**").permitAll()
                 .requestMatchers("/api/clientes").hasAnyRole("ADMIN", "GERENTE", "RECEPCIONISTA")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -54,7 +60,7 @@ public class SecurityConfig {
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder()); // ✅ Usa el encoder de texto plano
+        authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
     
@@ -73,18 +79,23 @@ public class SecurityConfig {
     
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // ✅ SOLO PARA DESARROLLO - Coincide con tus contraseñas en texto plano
+        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
         return new PasswordEncoder() {
             @Override
             public String encode(CharSequence rawPassword) {
-                return rawPassword.toString(); // Guarda tal cual
+                return bcrypt.encode(rawPassword);
             }
+
             @Override
             public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                // Compara directamente
-                boolean matches = rawPassword.toString().equals(encodedPassword);
-                System.out.println("🔍 Comparando: '" + rawPassword + "' vs '" + encodedPassword + "' = " + matches);
-                return matches;
+                if (encodedPassword.startsWith("$2a$") || encodedPassword.startsWith("$2b$")
+                        || encodedPassword.startsWith("$2y$")) {
+                    return bcrypt.matches(rawPassword, encodedPassword);
+                }
+
+                return MessageDigest.isEqual(
+                        rawPassword.toString().getBytes(StandardCharsets.UTF_8),
+                        encodedPassword.getBytes(StandardCharsets.UTF_8));
             }
         };
     }

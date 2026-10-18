@@ -1,13 +1,11 @@
 // src/components/Servicios.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Navbar from './Navbar';
 
 const Servicios = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [servicios, setServicios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -168,11 +166,17 @@ const Servicios = () => {
                     <h4 style={styles.nombre}>{s.nombre}</h4>
                     <p style={styles.descripcion}>{s.descripcion || 'Sin descripción'}</p>
                     <p style={styles.precio}>S/{s.precio}</p>
-                    <span style={{ ...styles.disponibleBadge, backgroundColor: s.disponible ? '#48bb78' : '#fc8181' }}>
-                      {s.disponible ? '✅ Disponible' : '❌ No disponible'}
+                    <p style={styles.stock}>
+                      <strong>Unidades disponibles:</strong> {s.stock ?? 0}
+                    </p>
+                    <span style={{
+                      ...styles.disponibleBadge,
+                      backgroundColor: s.disponible && (s.stock ?? 0) > 0 ? '#48bb78' : '#fc8181'
+                    }}>
+                      {!s.disponible ? '❌ No disponible' : (s.stock ?? 0) > 0 ? '✅ Disponible' : '📦 Agotado'}
                     </span>
                     
-                    {puedeAgregarServicios && s.disponible && (
+                    {puedeAgregarServicios && s.disponible && (s.stock ?? 0) > 0 && (
                       <button
                         className="btn-primary"
                         style={styles.agregarBtn}
@@ -217,9 +221,12 @@ const Servicios = () => {
                   <input
                     type="number"
                     min="1"
-                    max="10"
+                    max={selectedServicio.stock}
                     value={cantidad}
-                    onChange={(e) => setCantidad(parseInt(e.target.value) || 1)}
+                    onChange={(e) => setCantidad(Math.min(
+                      Number(selectedServicio.stock),
+                      Math.max(1, parseInt(e.target.value, 10) || 1)
+                    ))}
                     style={styles.input}
                   />
                 </div>
@@ -232,7 +239,11 @@ const Servicios = () => {
                 <button className="btn-danger" onClick={() => setShowModal(false)}>
                   Cancelar
                 </button>
-                <button className="btn-success" onClick={agregarServicio}>
+                <button
+                  className="btn-success"
+                  onClick={agregarServicio}
+                  disabled={cantidad > selectedServicio.stock}
+                >
                   ✅ Agregar
                 </button>
               </div>
@@ -308,6 +319,10 @@ const styles = {
     fontWeight: 'bold',
     color: '#2b6cb0',
     marginBottom: '12px',
+  },
+  stock: {
+    marginBottom: '8px',
+    fontSize: '14px',
   },
   disponibleBadge: {
     display: 'inline-block',
