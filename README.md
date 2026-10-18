@@ -1,4 +1,4 @@
-# Casa Andina - Sistema de Gestión de reservas hoteleras
+# Casa Andina - Sistema de Gestión de reservas de un hotel
 
 Sistema web para administrar reservas hoteleras, huéspedes, habitaciones,
 servicios, pagos, facturación y operaciones de recepción. La aplicación incluye
