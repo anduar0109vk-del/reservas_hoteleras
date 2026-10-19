@@ -2,9 +2,9 @@ name: Validacion del proyecto
 
 on:
   push:
-    branches: [master, "feature/**", "docs/**"]
+    branches: [master, develop, "feature/**", "docs/**"]
   pull_request:
-    branches: [master]
+    branches: [master, develop]
 
 jobs:
   backend:
@@ -33,5 +33,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Instalar dependencias
         run: npm ci
+      - name: Analizar frontend
+        run: npm run lint
       - name: Compilar frontend
         run: npm run build
