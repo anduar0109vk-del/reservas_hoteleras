@@ -1,4 +1,4 @@
-# Casa Andina - Sistema de Gestión de reservas de un hotel
+# Casa Andina - Sistema de reservas hoteleras
 
 Sistema web para administrar reservas hoteleras, huéspedes, habitaciones,
 servicios, pagos, facturación y operaciones de recepción. La aplicación incluye
@@ -41,19 +41,22 @@ web para clientes con acceso directo a WhatsApp.
 
 ```text
 Proyectos/
+├── .github/               # Workflows de GitHub Actions
+├── database/              # Esquema y migraciones MySQL
 ├── frontend/              # Aplicación React + Vite
-├── reservas-hoteleras/    # API Spring Boot
+├── src/                   # API y pruebas Spring Boot
+├── mvnw.cmd               # Maven Wrapper para Windows
 └── README.md
 ```
 
 ## Requisitos del sistema
 
 - Windows 10/11.
-- Java JDK 21.
+- Java JDK 25.
 - Node.js 18 o superior y npm.
 - Maven Wrapper incluido en el backend (`mvnw.cmd`).
-- XAMPP con Apache y MySQL/MariaDB.
-- Base de datos MariaDB/MySQL llamada `reservas_hoteleras`.
+- MySQL Server 8.0 o superior y MySQL Workbench.
+- Base de datos MySQL llamada `reservas_hoteleras`.
 - Navegador moderno: Chrome, Edge o Firefox.
 - Puertos disponibles:
   - Frontend: `5171`.
@@ -63,23 +66,18 @@ Proyectos/
 
 ### 1. Base de datos
 
-1. Inicia MySQL desde XAMPP.
-2. Crea la base de datos:
-
-```sql
-CREATE DATABASE reservas_hoteleras;
-```
-
-3. Importa el esquema y los datos iniciales proporcionados para el proyecto.
-4. Verifica la conexión en:
-   `reservas-hoteleras/src/main/resources/application.properties`.
+1. Inicia el servicio de MySQL Server.
+2. En MySQL Workbench, ejecuta `database/reservas_hoteleras.sql` para crear la
+   base de datos `reservas_hoteleras`, sus tablas y los datos iniciales.
+3. La conexión local predeterminada usa `localhost:3306` y el usuario `root`.
+   Configura `DB_URL`, `DB_USERNAME` y `DB_PASSWORD` si tu instalación difiere.
 
 La configuración de desarrollo espera:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/reservas_hoteleras
+spring.datasource.url=jdbc:mysql://localhost:3306/reservas_hoteleras?useSSL=false&serverTimezone=America/Lima&allowPublicKeyRetrieval=true
 spring.datasource.username=root
-spring.datasource.password=
+spring.datasource.password=${DB_PASSWORD}
 ```
 
 Si tu instalación usa otra contraseña, configura el valor localmente. No
@@ -87,10 +85,11 @@ publiques contraseñas, claves JWT ni claves de Stripe en el repositorio.
 
 ### 2. Backend
 
-Abre PowerShell en la carpeta del backend:
+Abre PowerShell en la raíz de este repositorio. Si MySQL requiere contraseña,
+configúrala en la terminal sin guardarla en el repositorio:
 
 ```powershell
-cd .\reservas-hoteleras
+$env:DB_PASSWORD = "tu contraseña de MySQL"
 .\mvnw.cmd clean install
 .\mvnw.cmd spring-boot:run
 ```
@@ -182,7 +181,6 @@ npm run build
 Backend:
 
 ```powershell
-cd .\reservas-hoteleras
 .\mvnw.cmd test
 ```
 
