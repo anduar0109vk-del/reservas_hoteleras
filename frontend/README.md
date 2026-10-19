@@ -1,16 +1,32 @@
-# React + Vite
+# Frontend de reservas hoteleras
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Interfaz web de Casa Andina construida con React y Vite. Para preparar MySQL y
+ejecutar también la API, consulta el [README principal](../README.md).
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 18 o posterior y npm.
+- API backend disponible en `http://localhost:39000` para las funciones que
+  requieren datos.
 
-## React Compiler
+## Instalar y ejecutar
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Desde esta carpeta, instala las dependencias y arranca el servidor de
+desarrollo:
 
-## Expanding the Oxlint configuration
+```powershell
+npm ci
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Vite sirve la aplicación en `http://localhost:5171`. Las peticiones bajo
+`/api` se reenvían al backend local en `http://localhost:39000`.
+
+## Comprobaciones
+
+```powershell
+npm run lint
+npm run build
+```
+
+El lint es de solo lectura; las advertencias que informa no modifican archivos.
