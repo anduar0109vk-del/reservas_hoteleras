@@ -52,7 +52,7 @@ Proyectos/
 ## Requisitos del sistema
 
 - Windows 10/11.
-- Java JDK 25.
+- Java JDK 21.
 - Node.js 18 o superior y npm.
 - Maven Wrapper incluido en el backend (`mvnw.cmd`).
 - MySQL Server 8.0 o superior y MySQL Workbench.
@@ -69,15 +69,16 @@ Proyectos/
 1. Inicia el servicio de MySQL Server.
 2. En MySQL Workbench, ejecuta `database/reservas_hoteleras.sql` para crear la
    base de datos `reservas_hoteleras`, sus tablas y los datos iniciales.
-3. La conexión local predeterminada usa `localhost:3306` y el usuario `root`.
-   Configura `DB_URL`, `DB_USERNAME` y `DB_PASSWORD` si tu instalación difiere.
+3. La conexión local predeterminada usa `localhost:3306`, el usuario `root` y
+   una contraseña vacía. Si tu instalación usa contraseña, configura
+   `DB_PASSWORD` en la terminal antes de iniciar el backend.
 
 La configuración de desarrollo espera:
 
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/reservas_hoteleras?useSSL=false&serverTimezone=America/Lima&allowPublicKeyRetrieval=true
 spring.datasource.username=root
-spring.datasource.password=${DB_PASSWORD}
+spring.datasource.password=${DB_PASSWORD:}
 ```
 
 Si tu instalación usa otra contraseña, configura el valor localmente. No
