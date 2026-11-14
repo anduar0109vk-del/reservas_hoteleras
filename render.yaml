@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: reservas-hoteleras-backend
+    runtime: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /api/habitaciones/disponibles
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: SPRING_JPA_SHOW_SQL
+        value: "false"
+      - key: PAYMENTS_DEMO_MODE
+        value: "true"
+      - key: JPA_DDL_AUTO
+        value: update
+      - key: FRONTEND_URL
+        value: "*"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false

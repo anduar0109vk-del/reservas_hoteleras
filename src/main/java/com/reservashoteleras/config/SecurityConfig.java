@@ -73,7 +73,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(false);
-        config.setAllowedOrigins(List.of(frontendUrl));
+        if ("*".equals(frontendUrl)) {
+            config.setAllowedOriginPatterns(List.of("*"));
+        } else {
+            config.setAllowedOriginPatterns(List.of(
+                frontendUrl,
+                "https://*.vercel.app",
+                "http://localhost:5171",
+                "http://localhost:3000",
+                "http://localhost:5173"
+            ));
+        }
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         
