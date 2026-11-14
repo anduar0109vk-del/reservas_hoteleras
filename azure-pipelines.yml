@@ -1,0 +1,90 @@
+trigger:
+  branches:
+    include:
+      - master
+      - develop
+
+pr:
+  branches:
+    include:
+      - master
+      - develop
+
+stages:
+  - stage: Backend
+    jobs:
+      - job: VerifyJava
+        pool:
+          vmImage: ubuntu-latest
+        container: maven:3.9.9-eclipse-temurin-25
+        steps:
+          - script: chmod +x mvnw && ./mvnw -B verify
+            displayName: Maven verify
+
+  - stage: Frontend
+    jobs:
+      - job: BuildReact
+        pool:
+          vmImage: ubuntu-latest
+        container: node:20
+        steps:
+          - script: npm ci
+            workingDirectory: frontend
+            displayName: Install dependencies
+          - script: npm run lint && npm run build
+            workingDirectory: frontend
+            displayName: Lint and build
+
+  - stage: Selenium
+    dependsOn:
+      - Backend
+      - Frontend
+    jobs:
+      - job: BrowserTest
+        pool:
+          vmImage: ubuntu-latest
+        container: maven:3.9.9-eclipse-temurin-25
+        services:
+          selenium: selenium/standalone-chrome:4
+        variables:
+          SELENIUM_BASE_URL: http://127.0.0.1:5171/login
+          SELENIUM_REMOTE_URL: http://selenium:4444/wd/hub
+        steps:
+          - script: |
+              apt-get update
+              apt-get install -y --no-install-recommends nodejs npm curl
+              cd frontend
+              npm ci
+              npm run dev -- --host 0.0.0.0 > "$AGENT_TEMPDIRECTORY/frontend.log" 2>&1 &
+              echo $! > "$AGENT_TEMPDIRECTORY/frontend.pid"
+              cd ..
+              for attempt in $(seq 1 30); do
+                if curl --fail --silent "$SELENIUM_BASE_URL" > /dev/null; then break; fi
+                sleep 2
+              done
+              curl --fail --silent "$SELENIUM_BASE_URL" > /dev/null
+              for attempt in $(seq 1 30); do
+                if curl --fail --silent http://selenium:4444/status > /dev/null; then break; fi
+                sleep 2
+              done
+              curl --fail --silent http://selenium:4444/status > /dev/null
+            displayName: Start frontend and wait for Selenium
+          - script: chmod +x mvnw && ./mvnw -B -Pselenium verify
+            displayName: Selenium integration test
+          - script: if [ -f "$AGENT_TEMPDIRECTORY/frontend.pid" ]; then kill "$(cat "$AGENT_TEMPDIRECTORY/frontend.pid")" || true; fi
+            displayName: Stop frontend
+            condition: always()
+
+  - stage: Containers
+    dependsOn:
+      - Backend
+      - Frontend
+    jobs:
+      - job: ValidateCompose
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - script: docker compose --env-file .env.example config --quiet
+            displayName: Validate Docker Compose
+          - script: docker compose --env-file .env.example build
+            displayName: Build container images

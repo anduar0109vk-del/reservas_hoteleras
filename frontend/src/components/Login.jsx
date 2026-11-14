@@ -6,8 +6,8 @@ import logoCasaAndina from '../assets/casa-andina-logo.png';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('admin@hotel.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -138,13 +138,6 @@ const Login = () => {
               </span>
             </p>
 
-            <div className="login-credentials" style={styles.credentials}>
-              <p>📋 Credenciales de prueba:</p>
-              <p><strong>Admin:</strong> admin@hotel.com / admin123</p>
-              <p><strong>Gerente:</strong> gerente@hotel.com / gerente123</p>
-              <p><strong>Recepcionista:</strong> recepcion@hotel.com / recepcion123</p>
-              <p><strong>Cliente:</strong> cliente@hotel.com / cliente123</p>
-            </div>
           </form>
         ) : (
           // ========== FORMULARIO REGISTRO ==========
@@ -364,14 +357,6 @@ const styles = {
     color: '#4299e1',
     fontWeight: '600',
     cursor: 'pointer',
-  },
-  credentials: {
-    marginTop: '16px',
-    padding: '12px',
-    backgroundColor: '#f7fafc',
-    borderRadius: '8px',
-    fontSize: '13px',
-    color: '#4a5568',
   },
   helpText: {
     fontSize: '11px',

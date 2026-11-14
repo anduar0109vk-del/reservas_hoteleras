@@ -1,0 +1,63 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: reservas_hoteleras
+      MYSQL_USER: reservas
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env.production}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env.production}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/reservas_hoteleras.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/production-disable-demo-accounts.sql:/docker-entrypoint-initdb.d/02-disable-demo-accounts.sql:ro
+    networks: [private]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PORT: "39000"
+      DB_URL: jdbc:mysql://mysql:3306/reservas_hoteleras?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: reservas
+      DB_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env.production}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env.production}
+      FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in .env.production}
+      PAYMENTS_DEMO_MODE: ${PAYMENTS_DEMO_MODE:-true}
+      SPRING_JPA_SHOW_SQL: "false"
+      LOGGING_LEVEL_COM_RESERVASHOTELERAS: WARN
+    expose: ["39000"]
+    networks: [private]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?Set API_DOMAIN in .env.production}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [private]
+
+networks:
+  private:
+
+volumes:
+  mysql_data:
+  caddy_data:
+  caddy_config:

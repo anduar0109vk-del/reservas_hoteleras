@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: reservas-hoteleras
+resources:
+  - k8s/namespace.yaml
+  - k8s/mysql.yaml
+  - k8s/backend.yaml
+configMapGenerator:
+  - name: mysql-init
+    files:
+      - 01-schema.sql=database/reservas_hoteleras.sql
+      - 02-disable-demo-accounts.sql=database/production-disable-demo-accounts.sql
+  - name: reservas-config
+    literals:
+      - frontend-url=https://reservas-hoteleras.vercel.app
+images:
+  - name: reservas-hoteleras-backend
+    newName: ghcr.io/anduar0109vk-del/reservas_hoteleras-backend
+    newTag: latest

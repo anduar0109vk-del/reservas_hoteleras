@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController @RequestMapping("/api/reclamos") @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ReclamoController {
     private final ReclamoService service;
 

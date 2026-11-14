@@ -1,0 +1,74 @@
+stages:
+  - test
+  - build
+  - browser-test
+  - containers
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  SELENIUM_BASE_URL: "http://127.0.0.1:5171/login"
+
+cache:
+  paths:
+    - .m2/repository/
+    - frontend/node_modules/
+
+backend-tests:
+  stage: test
+  image: maven:3.9.9-eclipse-temurin-25
+  script:
+    - chmod +x mvnw
+    - ./mvnw -B verify
+  artifacts:
+    when: always
+    reports:
+      junit: target/surefire-reports/TEST-*.xml
+
+frontend-build:
+  stage: build
+  image: node:20
+  script:
+    - cd frontend && npm ci && npm run lint && npm run build
+
+selenium-browser-test:
+  stage: browser-test
+  image: maven:3.9.9-eclipse-temurin-25
+  services:
+    - name: selenium/standalone-chrome:4
+      alias: selenium
+  variables:
+    SELENIUM_REMOTE_URL: "http://selenium:4444/wd/hub"
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends nodejs npm curl
+    - cd frontend
+    - npm ci
+    - npm run dev -- --host 0.0.0.0 > "$CI_PROJECT_DIR/frontend-ci.log" 2>&1 &
+    - cd "$CI_PROJECT_DIR"
+    - for attempt in $(seq 1 30); do if curl --fail --silent "$SELENIUM_BASE_URL" > /dev/null; then break; fi; sleep 2; done
+    - curl --fail --silent "$SELENIUM_BASE_URL" > /dev/null
+    - for attempt in $(seq 1 30); do if curl --fail --silent http://selenium:4444/status > /dev/null; then break; fi; sleep 2; done
+    - curl --fail --silent http://selenium:4444/status > /dev/null
+  script:
+    - chmod +x mvnw
+    - ./mvnw -B -Pselenium verify
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+        - target/failsafe-reports/TEST-*.xml
+  after_script:
+    - if [ -f frontend-ci.log ]; then cat frontend-ci.log; fi
+
+container-config:
+  stage: containers
+  image: docker:cli
+  services:
+    - name: docker:dind
+      command: ["--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - docker compose --env-file .env.example config --quiet
+    - docker compose --env-file .env.example build

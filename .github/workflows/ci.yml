@@ -17,6 +17,13 @@ jobs:
           cache: maven
       - name: Compilar backend
         run: bash ./mvnw verify
+      - name: Guardar resultados JUnit del backend
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-junit-results
+          path: target/surefire-reports/*.xml
+          if-no-files-found: warn
 
   frontend:
     runs-on: ubuntu-latest
@@ -34,3 +41,65 @@ jobs:
         run: npm ci
       - name: Compilar frontend
         run: npm run build
+
+      - name: Revisar frontend
+        run: npm run lint
+
+  selenium:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+          install-chromedriver: true
+      - name: Instalar frontend
+        working-directory: frontend
+        run: npm ci
+      - name: Iniciar frontend para Selenium
+        working-directory: frontend
+        run: |
+          npm run dev -- --host 0.0.0.0 > "$RUNNER_TEMP/frontend.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/frontend.pid"
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:5171/login > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/frontend.log"
+          exit 1
+      - name: Ejecutar prueba de interfaz Selenium
+        run: bash ./mvnw -B -Pselenium verify
+        env:
+          SELENIUM_BASE_URL: http://127.0.0.1:5171/login
+      - name: Guardar resultados JUnit y Selenium
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-junit-results
+          path: |
+            target/surefire-reports/*.xml
+            target/failsafe-reports/*.xml
+          if-no-files-found: warn
+      - name: Cerrar frontend
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/frontend.pid" ]; then kill "$(cat "$RUNNER_TEMP/frontend.pid")" || true; fi
+
+  container-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar Docker Compose
+        run: docker compose --env-file .env.example config --quiet
+      - name: Construir imágenes de contenedores
+        run: docker compose --env-file .env.example build

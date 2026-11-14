@@ -14,7 +14,6 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/clientes")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ClienteController {
     private final ClienteRepository clienteRepository;
 
