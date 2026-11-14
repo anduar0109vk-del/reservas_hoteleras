@@ -16,7 +16,7 @@ stages:
       - job: VerifyJava
         pool:
           vmImage: ubuntu-latest
-        container: maven:3.9.9-eclipse-temurin-25
+        container: eclipse-temurin:25-jdk
         steps:
           - script: chmod +x mvnw && ./mvnw -B verify
             displayName: Maven verify
@@ -43,7 +43,7 @@ stages:
       - job: BrowserTest
         pool:
           vmImage: ubuntu-latest
-        container: maven:3.9.9-eclipse-temurin-25
+        container: eclipse-temurin:25-jdk
         services:
           selenium: selenium/standalone-chrome:4
         variables:

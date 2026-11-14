@@ -15,7 +15,7 @@ cache:
 
 backend-tests:
   stage: test
-  image: maven:3.9.9-eclipse-temurin-25
+  image: eclipse-temurin:25-jdk
   script:
     - chmod +x mvnw
     - ./mvnw -B verify
@@ -32,7 +32,7 @@ frontend-build:
 
 selenium-browser-test:
   stage: browser-test
-  image: maven:3.9.9-eclipse-temurin-25
+  image: eclipse-temurin:25-jdk
   services:
     - name: selenium/standalone-chrome:4
       alias: selenium

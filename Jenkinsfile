@@ -10,7 +10,7 @@ pipeline {
         stage('Backend tests') {
             steps {
                 sh 'chmod +x mvnw'
-                sh './mvnw -B verify'
+                sh 'chmod +x mvnw && ./mvnw -B verify'
             }
         }
 
@@ -44,7 +44,7 @@ pipeline {
                     curl --fail --silent http://127.0.0.1:4444/status > /dev/null
                 '''
                 withEnv(['SELENIUM_REMOTE_URL=http://127.0.0.1:4444/wd/hub', 'SELENIUM_BASE_URL=http://127.0.0.1:5171/login']) {
-                    sh './mvnw -B -Pselenium verify'
+                    sh 'chmod +x mvnw && ./mvnw -B -Pselenium verify'
                 }
             }
             post {
