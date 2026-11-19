@@ -76,9 +76,8 @@ public class SecurityConfig {
         if ("*".equals(frontendUrl)) {
             config.setAllowedOriginPatterns(List.of("*"));
         } else {
-            config.setAllowedOriginPatterns(List.of(
+            config.setAllowedOrigins(List.of(
                 frontendUrl,
-                "https://*.vercel.app",
                 "http://localhost:5171",
                 "http://localhost:3000",
                 "http://localhost:5173"

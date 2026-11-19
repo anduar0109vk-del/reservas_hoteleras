@@ -16,7 +16,7 @@ services:
       - key: JPA_DDL_AUTO
         value: update
       - key: FRONTEND_URL
-        value: "*"
+        value: https://reservas-hoteleras.vercel.app
       - key: JWT_SECRET
         generateValue: true
       - key: DB_URL

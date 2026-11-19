@@ -1,8 +1,8 @@
-# GUÍA DE DESPLIEGUE EN LA NUBE 100% GRATIS
+# GUÍA DE DESPLIEGUE EN VERCEL, RENDER Y MYSQL
 ## Frontend en Vercel + Backend en Render + Base de Datos MySQL en la Nube
 ### Proyecto: Sistema de Gestión de Reservas Hoteleras – Casa Andina Chiclayo
 
-Esta guía explica paso a paso cómo desplegar el proyecto en vivo en la nube utilizando únicamente servicios de nivel gratuito (**Free Tier sin costo y sin necesidad de ingresar tarjeta de crédito**).
+Los niveles gratuitos tienen límites que pueden cambiar y no garantizan disponibilidad continua. Vercel Hobby es para proyectos personales/no comerciales; para uso real de un hotel, revisa los términos actuales antes de publicar.
 
 Al finalizar, obtendrás:
 1. **Frontend en vivo:** `https://tu-proyecto.vercel.app` (Certificado SSL/HTTPS automático).
@@ -41,7 +41,7 @@ Al finalizar, obtendrás:
 
 ---
 
-## PASO 1: BASE DE DATOS MYSQL GRATIS EN LA NUBE (2 MINUTOS)
+## PASO 1: BASE DE DATOS MYSQL
 
 Recomendamos **TiDB Cloud (Serverless)** o **Aiven**, que ofrecen MySQL gratuito para siempre sin solicitar tarjeta.
 
@@ -133,6 +133,14 @@ Recomendamos **TiDB Cloud (Serverless)** o **Aiven**, que ofrecen MySQL gratuito
 
 Una vez realizado el despliegue, agrega los enlaces en la portada y conclusiones de tu informe:
 
-- **Frontend en Producción:** `https://<tu-app>.vercel.app`
+- **Frontend en Producción:** `https://reservas-hoteleras.vercel.app`
 - **API Backend en Producción:** `https://<tu-backend>.onrender.com/api`
 - **Repositorio GitHub:** `https://github.com/anduar0109vk-del/reservas_hoteleras`
+
+## Correcciones para el despliegue actual
+
+- MySQL Workbench es el cliente; la captura indica que el servidor está en Railway (`viaduct.proxy.rlwy.net:37427`). Usa las credenciales que ya tienes en Workbench/Railway. Si el esquema ya está importado, no ejecutes otra vez el SQL completo.
+- El proyecto Vercel existente ya está enlazado a `frontend/` del repositorio y al branch `master`. No es necesario crear otro proyecto.
+- La variable Vercel `VITE_API_BASE_URL` ya está guardada en Production con `https://reservas-hoteleras-backend.onrender.com/api`. Si Render asignó otro hostname, actualiza la variable antes de desplegar.
+- En Render, configura `DB_URL` como `jdbc:mysql://<HOST>:<PUERTO>/reservas_hoteleras?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true`, más `DB_USERNAME` y `DB_PASSWORD` con los valores existentes en Railway. Genera `JWT_SECRET` desde Render y configura `FRONTEND_URL=https://reservas-hoteleras.vercel.app`.
+- Los planes gratuitos tienen límites, pueden suspender servicios inactivos y sus condiciones cambian. Vercel Hobby es para uso personal/no comercial; verifica los términos vigentes antes de usar este despliegue para operar un hotel.
