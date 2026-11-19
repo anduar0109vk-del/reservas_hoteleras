@@ -44,6 +44,7 @@ public class SecurityConfig {
             .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(
                     (request, response, exception) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED)))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/actuator/health").permitAll()
                 .requestMatchers("/api/auth/**", "/api/habitaciones/disponibles", 
                                 "/api/habitaciones/mas-pedidas", "/api/habitaciones/destacadas",
                                 "/api/servicios/disponibles").permitAll()
