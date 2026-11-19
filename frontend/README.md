@@ -1,23 +1,32 @@
-# Frontend de reservas hoteleras
+# Frontend de reservas hoteleras - Casa Andina
 
-Aplicación web desarrollada con React y Vite. Para instalar el sistema completo,
-configurar MySQL Server y ejecutar el backend, sigue las instrucciones del
-[README principal](../README.md).
+Interfaz web de Casa Andina construida con React y Vite. Para preparar MySQL y
+ejecutar también la API, consulta el [README principal](../README.md).
 
-Desde la raíz del repositorio:
+## Requisitos
+
+- Node.js 18 o posterior y npm.
+- API backend disponible en `http://localhost:39000` para las funciones que
+  requieren datos.
+
+## Instalar y ejecutar
+
+Desde esta carpeta, instala las dependencias y arranca el servidor de
+desarrollo:
 
 ```powershell
-cd .\frontend
 npm ci
 npm run dev
 ```
 
-Vite inicia en `http://localhost:5171` y envía las solicitudes `/api` al backend
-local en `http://localhost:39000`.
+Vite sirve la aplicación en `http://localhost:5171`. Las peticiones bajo
+`/api` se reenvían al backend local en `http://localhost:39000`.
 
-Para verificar el frontend:
+## Comprobaciones
 
 ```powershell
+npm run lint
 npm run build
-npx oxlint src
 ```
+
+El lint es de solo lectura; las advertencias que informa no modifican archivos.
