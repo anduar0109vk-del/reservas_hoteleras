@@ -88,14 +88,6 @@ jobs:
           done
           cat "$RUNNER_TEMP/frontend.log"
           exit 1
-      - name: Esperar Selenium remoto
-        run: |
-          for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:4444/status | grep -q '"ready":true'; then exit 0; fi
-            sleep 2
-          done
-          echo "Selenium no quedó listo a tiempo"
-          exit 1
       - name: Ejecutar prueba de interfaz Selenium
         run: bash ./mvnw -B -Pselenium verify
         env:
