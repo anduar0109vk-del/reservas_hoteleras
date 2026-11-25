@@ -157,6 +157,32 @@ El proyecto incluye 4 configuraciones de pipeline listas para producción:
 | **Azure Pipelines**| `azure-pipelines.yml` | `Backend` (Temurin 25), `Frontend` (Node 20), `Selenium`, `Containers` |
 | **Jenkins** | `Jenkinsfile` | Declarative Pipeline con publicación de reportes JUnit XML |
 
+### 7.1. Publicación de imágenes en Docker Hub
+
+El workflow `dockerhub-publish.yml` publica la imagen del backend al crear una etiqueta `v*`. Para habilitarlo, configura en **GitHub → Settings → Secrets and variables → Actions**:
+
+- `DOCKERHUB_USERNAME`: usuario de Docker Hub.
+- `DOCKERHUB_TOKEN`: Access Token de Docker Hub (no la contraseña de la cuenta).
+
+El repositorio destino de la imagen se configura con `DOCKERHUB_IMAGE` (variable de Actions, por ejemplo `usuario/reservas-hoteleras-backend`). Sin estos valores, no se publicará ninguna imagen. La publicación de la imagen no es requisito para que Render construya el Dockerfile desde GitHub.
+
+### 7.2. Monitoreo de despliegue
+
+- **Render:** revisa Events y Logs del servicio, su estado, el resultado del health check y las métricas de CPU/memoria. En el plan Free el servicio puede suspenderse por inactividad y tardar en despertar.
+- **Salud de la API:** `GET /actuator/health` es el health check configurado en `render.yaml`; `GET /` informa el estado general del servicio.
+- **Vercel:** revisa Deployments y Runtime Logs del proyecto frontend. Comprueba que `VITE_API_BASE_URL` apunte a la URL pública vigente del backend.
+- **GitHub Actions:** la ejecución `Validacion del proyecto` debe completar backend, frontend, Selenium y validación/build de contenedores. Los informes JUnit quedan como artifacts de la ejecución.
+
+### 7.3. Mantenimiento y copias de seguridad
+
+La base de datos MySQL administrada remotamente no queda respaldada por los volúmenes de Docker local. Configura una tarea diaria en el sistema operativo de un equipo o servidor que tenga acceso de red al host MySQL; ejecuta `scripts/backup-mysql.ps1` y conserva copias cifradas fuera del equipo. El script toma host, puerto, base de datos y usuario desde variables de entorno y solicita la contraseña sin mostrarla. La carpeta `backups/` está excluida de Git.
+
+Antes de activar una tarea automática, exporta manualmente una copia y prueba su restauración en una base de datos de prueba. Define retención (por ejemplo, 14 copias diarias y 8 semanales), verifica periódicamente que los archivos no estén vacíos y documenta quién tiene acceso. No guardes credenciales dentro del repositorio ni en el Programador de tareas; usa el almacén de credenciales del equipo o un gestor de secretos. Para Docker Compose local, `docker compose logs --since 24h backend` ayuda a revisar errores; programa también la actualización de imágenes base y dependencias.
+
+### 7.4. Prueba y recuperación
+
+En cada cambio ejecuta backend `./mvnw verify`, frontend `npm ci && npm run lint && npm run build` y `docker compose --env-file .env.example config --quiet`. Para validar una restauración MySQL, importa la última copia en un esquema aislado y comprueba conteos de tablas y acceso de los roles. En Render, usa la pestaña Events para volver al último despliegue exitoso ante un fallo; en Vercel, promueve/reasigna el deployment anterior. Registra fecha, versión, resultado de salud y resultado de restauración.
+
 ---
 
 ## 8. RESOLUCIÓN DE INCIDENCIAS FRECUENTES (TROUBLESHOOTING)

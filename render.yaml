@@ -5,12 +5,14 @@ services:
     dockerfilePath: Dockerfile
     plan: free
     region: oregon
-    healthCheckPath: /api/habitaciones/disponibles
+    healthCheckPath: /actuator/health
     envVars:
       - key: PORT
         value: 10000
       - key: SPRING_JPA_SHOW_SQL
         value: "false"
+      - key: LOGGING_LEVEL_COM_RESERVASHOTELERAS
+        value: WARN
       - key: PAYMENTS_DEMO_MODE
         value: "true"
       - key: JPA_DDL_AUTO

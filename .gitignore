@@ -40,3 +40,4 @@ build/
 
 # Local container artifacts
 *.log
+/backups/
