@@ -60,6 +60,7 @@ jobs:
     services:
       selenium:
         image: selenium/standalone-chrome:4.27.0-20241204
+        options: --add-host=host.docker.internal:host-gateway
         ports:
           - 4444:4444
     steps:
@@ -91,7 +92,7 @@ jobs:
       - name: Ejecutar prueba de interfaz Selenium
         run: bash ./mvnw -B -Pselenium verify
         env:
-          SELENIUM_BASE_URL: http://127.0.0.1:5171/login
+          SELENIUM_BASE_URL: http://host.docker.internal:5171/login
           SELENIUM_REMOTE_URL: http://127.0.0.1:4444/wd/hub
       - name: Guardar resultados JUnit y Selenium
         if: always()
